@@ -1,0 +1,32 @@
+[package]
+name            = "neko"
+version         = "0.0.1"
+authors         = ["adjivas <adjivas@users.noreply.github.com>"]
+description     = ""
+readme          = "README.md"
+keywords        = ["editor","neko", "glyphArt", "sprite", "texel"]
+license         = "GPL-3.0"
+
+[[bin]]
+name            = "editor"
+path            = "src/main.rs"
+doc             = false
+test            = false
+
+[features]
+default          = []
+lints            = ["clippy", "nightly"]
+nightly          = [] # for building with nightly and unstable features
+unstable         = [] # for building with unstable features on stable Rust
+debug            = [] # for building with debug messages
+travis           = ["lints", "nightly"] # for building with travis-cargo
+
+[dependencies.clippy]
+version          = "*"
+optional         = true
+
+[dependencies.neko]
+git              = "https://github.com/Arukana/Neko.git"
+
+[dependencies.termion]
+version          = "1.0"
