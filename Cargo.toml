@@ -13,6 +13,13 @@ path            = "src/main.rs"
 doc             = false
 test            = false
 
+[lib]
+name             = "editeur"
+path             = "src/lib.rs"
+plugin           = true
+doctest          = false
+test             = false
+
 [features]
 default          = []
 lints            = ["clippy", "nightly"]

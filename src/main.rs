@@ -24,9 +24,38 @@
         unused_qualifications
 )]
 
-extern crate neko;
+extern crate editeur;
 extern crate termion;
 
+use termion::event::*;
+use termion::cursor;
+use termion::input::TermRead;
+use std::io::{self, Write};
+
 fn main() {
-  println!("Nya! Let's start!");
+    let mut editeur: editeur::Editeur = editeur::Editeur::new().unwrap();
+
+    let stdin = io::stdin();
+    stdin.events().filter_map(|c| c.ok())
+                  .all(|evt| {
+        match evt {
+            Event::Key(Key::Char('q')) => false,
+            evt => {
+                match evt {
+                    Event::Mouse(me) => {
+                        match me {
+                            MouseEvent::Press(_, a, b) |
+                            MouseEvent::Release(a, b) |
+                            MouseEvent::Hold(a, b) => {
+                                editeur.write(format!("{}ss", cursor::Goto(a, b)).as_bytes()).unwrap();
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+                editeur.flush().unwrap();
+                true
+            }
+        }
+    });
 }
