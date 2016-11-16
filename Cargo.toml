@@ -32,8 +32,5 @@ travis           = ["lints", "nightly"] # for building with travis-cargo
 version          = "*"
 optional         = true
 
-[dependencies.neko]
-git              = "https://github.com/Arukana/Neko.git"
-
 [dependencies.termion]
 version          = "1.0"

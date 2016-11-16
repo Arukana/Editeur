@@ -1,7 +1,8 @@
 use std::error::Error;
-use neko::prelude::ManagerError;
 use std::fmt;
 use std::io;
+
+use super::graphic::GraphicError;
 
 pub type Result<T> = ::std::result::Result<T, EditeurError>;
 
@@ -13,8 +14,8 @@ pub enum EditeurError {
     Write(io::Error),
     /// Can't enter in Raw Mode.
     Raw(io::Error),
-    /// The Graphic Manager has meet an error.
-    Graphic(ManagerError),
+    /// The Graphic Graphic has meet an error.
+    Graphic(GraphicError),
 }
 
 
@@ -33,14 +34,14 @@ impl Error for EditeurError {
         match *self {
             EditeurError::Write(_) => "Can't write on the output.",
             EditeurError::Raw(_) => "Can't enter in Raw Mode.",
-            EditeurError::Graphic(_) => "The Graphic Manager has meet an error",
+            EditeurError::Graphic(_) => "The Graphic Graphic has meet an error",
         }
     }
 
     /// The function `cause` returns the lower-level cause of this error, if any.
     fn cause(&self) -> Option<&Error> {
         match *self {
-            EditeurError::Write(ref err) => Some(err),
+            EditeurError::Write(ref err) |
             EditeurError::Raw(ref err) => Some(err),
             EditeurError::Graphic(ref err) => Some(err),
 //           _ => None,
