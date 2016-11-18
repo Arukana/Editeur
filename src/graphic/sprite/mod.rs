@@ -23,22 +23,8 @@ impl Sprite {
         self.sheet.push(draw);
     }
 
-    /// The mutator method `add_position` changes the position of
-    /// the file sprite cursor.
-    pub fn add_position(&mut self, position: usize) {
-        if let Some(pos) = self.position.checked_add(position) {
-            if pos < self.sheet.len() {
-                self.position = pos;
-            }
-        }
-    }
-
-    /// The mutator method `sub_position` changes the position of
-    /// the file sprite cursor.
-    pub fn sub_position(&mut self, position: usize) {
-        if let Some(pos) = self.position.checked_sub(position) {
-            self.position = pos;
-        }
+    pub fn current(&self) -> Option<(&Emotion, &Texel)> {
+        self.sheet.get(self.position).and_then(|draw| draw.current())
     }
 
     /// The mutator method `add_position_draw` changes the position of

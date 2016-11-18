@@ -31,6 +31,8 @@
 
 extern crate termion;
 
+#[macro_use]
+mod macros;
 mod graphic;
 mod menu;
 mod err;
@@ -122,16 +124,19 @@ impl Iterator for Editeur {
                       match event {
                           Event::Key(Key::Ctrl('q')) |
                           Event::Key(Key::Char('q')) => None,
-
-                          Event::Key(Key::Ctrl('j')) => Some(self.graphic.sub_position(1)),
-                          Event::Key(Key::Ctrl('k')) => Some(self.graphic.add_position(1)),
-                          Event::Key(Key::Ctrl('h')) => Some(self.graphic.sub_position_sprite(1)),
-                          Event::Key(Key::Ctrl('l')) => Some(self.graphic.add_position_sprite(1)),
-
-                          Event::Key(Key::Char('h')) => Some(self.graphic.sub_position_sprite_draw(1)),
-                          Event::Key(Key::Char('j')) => Some(self.graphic.sub_position_sprite_draw(SPEC_MAX_X)),
-                          Event::Key(Key::Char('k')) => Some(self.graphic.add_position_sprite_draw(SPEC_MAX_X)),
-                          Event::Key(Key::Char('l')) => Some(self.graphic.add_position_sprite_draw(1)),
+                          Event::Key(Key::PageUp) => Some(self.graphic.sub_position(1)),
+                          Event::Key(Key::PageDown) => Some(self.graphic.add_position(1)),
+                          Event::Key(Key::Char('h')) |
+                          Event::Key(Key::Left) => Some(self.graphic.sub_position_sprite_draw(1)),
+                          Event::Key(Key::Char('k')) |
+                          Event::Key(Key::Up) => Some(self.graphic.sub_position_sprite_draw(SPEC_MAX_X)),
+                          Event::Key(Key::Char('j')) |
+                          Event::Key(Key::Down) => Some(self.graphic.add_position_sprite_draw(SPEC_MAX_X)),
+                          Event::Key(Key::Char('l')) |
+                          Event::Key(Key::Right) => Some(self.graphic.add_position_sprite_draw(1)),
+                          Event::Key(Key::Char(nbr @ '0' ... '9')) => Some(self.graphic.set_cell_draw(
+                              nbr as usize - '0' as usize
+                          )),
                           e => {
                               println!("{:?}", e);
                               Some(())

@@ -7,19 +7,29 @@ use self::part::Part;
 use std::fmt;
 
 #[derive(Clone, Copy, Debug)]
-pub struct Texel(Part, char);
+pub struct Texel(pub Part, pub char);
 
 impl Texel {
-  pub fn new(part: &str, glyph: char) -> Result<Self> {
-      if let '\u{e000}'...'\u{efff}' = glyph {
-      match Part::new(part) {
-        Ok(part) => Ok(Texel(part, glyph)),
-        Err(why) => Err(TexelError::PartFail(why)),
-      }
-    } else {
-      Err(TexelError::ForbiddenGlyph(glyph))
+    pub fn new(part: &str, glyph: char) -> Result<Self> {
+        if let '\u{e000}'...'\u{efff}' = glyph {
+            match Part::new(part) {
+                Ok(part) => Ok(Texel(part, glyph)),
+                Err(why) => Err(TexelError::PartFail(why)),
+            }
+        } else {
+            Err(TexelError::ForbiddenGlyph(glyph))
+        }
     }
-  }
+
+    /// The accessor method `get_part` returns the Texel Part.
+    pub fn get_part(&self) -> &Part {
+        &self.0
+    }
+
+    /// The accessor method `get_glyph` returns the Texel Glyph.
+    pub fn get_glyph(&self) -> &char {
+        &self.1
+    }
 }
 
 impl PartialEq for Texel {

@@ -1,5 +1,7 @@
 pub mod err;
 
+use std::fmt;
+
 pub use self::err::{PartError, Result};
 
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
@@ -17,5 +19,15 @@ impl Part {
             "None" => Ok(Part::None),
             _ => Err(PartError::UnknownPart),
         }
+    }
+}
+
+impl fmt::Display for Part {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            Part::EyeLeft => "El",
+            Part::EyeRight => "Er",
+            Part::None => "__",
+        })
     }
 }
