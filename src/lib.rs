@@ -30,6 +30,8 @@
 )]
 
 extern crate termion;
+#[cfg(feature = "clipboard")]
+extern crate clipboard;
 
 #[macro_use]
 mod macros;
@@ -46,6 +48,9 @@ use termion::input::{self, TermRead};
 use termion::raw::{self, IntoRawMode};
 use termion::event::{Event, Key};
 
+#[cfg(feature = "clipboard")]
+use clipboard::ClipboardContext;
+
 use graphic::Graphic;
 
 use graphic::sprite::draw::SPEC_MAX_X;
@@ -59,6 +64,8 @@ pub struct Editeur {
     graphic: Graphic,
     input: input::Events<std::io::Stdin>,
     output: input::MouseTerminal<raw::RawTerminal<io::Stdout>>,
+    #[cfg(feature = "clipboard")]
+    kopimism: Option<ClipboardContext>,
     menu: Menu,
 }
 
@@ -76,12 +83,7 @@ impl Editeur {
                 ) {
                     Err(EditeurError::Write(why))
                 } else {
-                    Ok(Editeur {
-                        graphic: graphic,
-                        input: io::stdin().events(),
-                        output: output,
-                        menu: Menu::default(),
-                    })
+                    Ok(editeur_new!(graphic, output))
                 }
             },
         }
@@ -101,10 +103,9 @@ impl Write for Editeur {
 impl fmt::Display for Editeur {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}{}\n\r{}\n\r",
-                 termion::cursor::Goto(1, 1),
-                 self.menu,
-                 self.graphic
-        )
+               termion::cursor::Goto(1, 1),
+               self.menu,
+               self.graphic)
     }
 }
 
@@ -124,24 +125,41 @@ impl Iterator for Editeur {
                       match event {
                           Event::Key(Key::Ctrl('q')) |
                           Event::Key(Key::Char('q')) => None,
-                          Event::Key(Key::PageUp) => Some(self.graphic.sub_position(1)),
-                          Event::Key(Key::PageDown) => Some(self.graphic.add_position(1)),
+
+                          #[cfg(feature = "clipboard")]
+                          Event::Key(Key::Ctrl('c')) |
+                          Event::Key(Key::Char('c')) => self.kopimism.set_contents(
+                              &format("{:?}". self.graphic)
+                          ).ok(),
+                          Event::Key(Key::PageUp) => Some(
+                              self.graphic.sub_position(1)
+                          ),
+                          Event::Key(Key::PageDown) => Some(
+                              self.graphic.add_position(1)
+                          ),
                           Event::Key(Key::Char('h')) |
-                          Event::Key(Key::Left) => Some(self.graphic.sub_position_sprite_draw(1)),
+                          Event::Key(Key::Left) => Some(
+                              self.graphic.sub_position_sprite_draw(1)
+                          ),
                           Event::Key(Key::Char('k')) |
-                          Event::Key(Key::Up) => Some(self.graphic.sub_position_sprite_draw(SPEC_MAX_X)),
+                          Event::Key(Key::Up) => Some(
+                              self.graphic.sub_position_sprite_draw(SPEC_MAX_X)
+                          ),
                           Event::Key(Key::Char('j')) |
-                          Event::Key(Key::Down) => Some(self.graphic.add_position_sprite_draw(SPEC_MAX_X)),
+                          Event::Key(Key::Down) => Some(
+                              self.graphic.add_position_sprite_draw(SPEC_MAX_X)
+                          ),
                           Event::Key(Key::Char('l')) |
-                          Event::Key(Key::Right) => Some(self.graphic.add_position_sprite_draw(1)),
-                          Event::Key(Key::Char(nbr @ '0' ... '9')) => Some(self.graphic.set_cell_draw(
-                              nbr as usize - '0' as usize
-                          )),
+                          Event::Key(Key::Right) => Some(
+                              self.graphic.add_position_sprite_draw(1)
+                          ),
+                          Event::Key(Key::Char(nbr @ '0' ... '9')) => Some(
+                              self.graphic.set_cell_draw(nbr as usize - '0' as usize)
+                          ),
                           e => {
                               println!("{:?}", e);
                               Some(())
                           },
-                      }
-            )
+                      })
     }
 }

@@ -8,9 +8,9 @@ pub struct Menu {
 
 impl fmt::Display for Menu {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}Exit <q>{}",
-               color::Bg(color::Cyan),
-               color::Bg(color::Reset)
+        write!(f, "{}Quit <q> Copy <c> Past <v>{}",
+              color::Bg(color::Cyan),
+              color::Bg(color::Reset)
         )
     }
 }

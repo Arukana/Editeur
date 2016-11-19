@@ -39,7 +39,7 @@ pub struct Graphic {
     /// Dictionary of texel.
     texel: HashMap<Position, HashMap<(Part, Emotion), Texel>>,
     /// Dictionary of sprite.
-    sprite: Vec<(PathBuf, (Position, Sprite))>,
+    sprite: Vec<(PathBuf, Sprite)>,
     /// Index of file.
     position: usize,
 }
@@ -144,7 +144,7 @@ impl Graphic {
     }
 
     /// The function `insert_sprite` insert a sprite.
-    fn insert_sprite(&mut self, (file, sprite): (&Path, (Position, Sprite))) {
+    fn insert_sprite(&mut self, (file, sprite): (&Path, Sprite)) {
         self.sprite.push((file.to_path_buf(), sprite))
     }
 
@@ -267,7 +267,7 @@ impl Graphic {
                             self.sprite_with_draw(
                                 &mut sprite, &position, &words
                             ).and_then(|()|
-                                Ok(self.insert_sprite((source.as_ref(), (position, sprite))))
+                                Ok(self.insert_sprite((source.as_ref(), sprite)))
                             )
                         },
                     }
@@ -297,7 +297,7 @@ impl Graphic {
     /// The mutator method `add_position_sprite_draw` changes the position of
     /// the cell board cursor.
     pub fn add_position_sprite_draw(&mut self, position: usize) {
-        if let Some(&mut (_, (_, ref mut sprite))) = self.sprite.get_mut(self.position) {
+        if let Some(&mut (_, ref mut sprite)) = self.sprite.get_mut(self.position) {
             sprite.add_position_draw(position);
         }
     }
@@ -305,61 +305,75 @@ impl Graphic {
     /// The mutator method `sub_position_sprite_draw` changes the position of
     /// the cell board cursor.
     pub fn sub_position_sprite_draw(&mut self, position: usize) {
-        if let Some(&mut (_, (_, ref mut sprite))) = self.sprite.get_mut(self.position) {
+        if let Some(&mut (_, ref mut sprite)) = self.sprite.get_mut(self.position) {
             sprite.sub_position_draw(position);
         }
     }
 
-    pub fn get_cell(&self, position: usize) -> Option<(&(Part, Emotion), &Texel)> {
-        self.sprite.get(self.position).and_then(|&(_, (ref posture, _))|
-            self.texel.get(posture).and_then(|texels|
-                texels.iter().collect::<Vec<_>>().get(position).and_then(|&cell|
-                    Some(cell)
-                )
-            )
-        )
+    pub fn get_cell(
+        &self, position: usize,
+    ) -> Option<(&(Part, Emotion), &Texel)> {
+        self.sprite.get(self.position)
+            .and_then(|&(_, ref sprite)|
+                      sprite.get_posture()
+                      .and_then(|posture|
+                                self.texel.get(posture)
+                                .and_then(|texels|
+                                          texels.iter()
+                                          .collect::<Vec<_>>()
+                                          .get(position)
+                                          .and_then(|&cell|
+                                                    Some(cell)))))
     }
 
     pub fn set_cell_draw(&mut self, position: usize) {
+        self.get_cell(position)
+            .and_then(|(&(_, ref emotion), texel)|
+                      Some((*emotion, *texel))
+            ).and_then(|(emotion, texel)|
+                       self.sprite.get_mut(self.position)
+                       .and_then(|&mut (_, ref mut sprite)|
+                                 sprite.set_current((&emotion, &texel))));
     }
 }
 
 impl fmt::Display for Graphic {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match self.sprite.get(self.position) {
-            None => "\n\r".to_string(),
-            Some(&(ref path, (ref posture, ref sprite))) => {
-                let current: Option<(&Emotion, &Texel)> = sprite.current();
-                format!("{:?}\n\r{}{}",
-                        path.file_stem().unwrap_or_default(),
-                        sprite,
-                        self.texel.get(posture)
-                        .and_then(|texels|
-                                  Some(texels.iter()
-                                       .collect::<Vec<(&(Part, Emotion), &Texel)>>()
-                                       .as_slice()
-                                       .chunks(SPEC_MAX_X)
-                                       .map(|line|
-                                           format!("{}{}{}",
-                                              line.iter()
-                                                   .map(|&(&(_, ref emotion), ref texel)|
-                                                        format_cell!(texel, current, Some((&emotion, &texel)))
-                                                   ).collect::<String>(),
-                                              line.iter()
-                                                   .map(|&(&(_, ref emotion), ref texel)|
-                                                        format_cell!(texel, current, Some((&emotion, &texel)))
-                                                   ).collect::<String>(),
-                                              line.iter()
-                                                  .map(|&(&(_, ref emotion), ref texel)|
-                                                        format_cell!(texel, current, Some((&emotion, &texel)))
-                                                   ).collect::<String>()
-                                           )
-                                       )
-                                       .collect::<String>())
-                        ).unwrap_or_default())
-            },
-        })
+        write!(f, "{}", self.sprite
+               .get(self.position)
+               .and_then(|&(ref path, ref sprite)|
+                         sprite.get_posture()
+                         .and_then(|posture| Some({
+                             let current: Option<(&Emotion, &Texel)> = sprite.current();
+                             format!("{:?}\n\r{}{}",
+                                     path.file_stem().unwrap_or_default(),
+                                     sprite,
+                                     self.texel.get(posture)
+                                     .and_then(|texels|
+                                               Some(texels.iter()
+                                                    .collect::<Vec<(&(Part, Emotion), &Texel)>>()
+                                                    .as_slice()
+                                                    .chunks(SPEC_MAX_X)
+                                                    .map(|line|
+                                                         format!("{}{}{}",
+                                                                 line.iter()
+                                                                 .map(|&(&(_, ref emotion), ref texel)|
+                                                                      format_cell!(texel, current, Some((&emotion, &texel)))
+                                                                 ).collect::<String>(),
+                                                                 line.iter()
+                                                                 .map(|&(&(_, ref emotion), ref texel)|
+                                                                      format_cell!(texel, current, Some((&emotion, &texel)))
+                                                                 ).collect::<String>(),
+                                                                 line.iter()
+                                                                 .map(|&(&(_, ref emotion), ref texel)|
+                                                                      format_cell!(texel, current, Some((&emotion, &texel)))
+                                                                 ).collect::<String>()
+                                                         )
+                                                    )
+                                                    .collect::<String>())
+                                     ).unwrap_or_default())
+                         }))).unwrap_or_default())
     }
 }
 

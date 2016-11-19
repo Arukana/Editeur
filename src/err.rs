@@ -44,7 +44,6 @@ impl Error for EditeurError {
             EditeurError::Write(ref err) |
             EditeurError::Raw(ref err) => Some(err),
             EditeurError::Graphic(ref err) => Some(err),
-//           _ => None,
         }
     }
 }

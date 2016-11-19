@@ -32,5 +32,9 @@ travis           = ["lints", "nightly"] # for building with travis-cargo
 version          = "*"
 optional         = true
 
+[dependencies.clipboard]
+version          = "0.1.2"
+optional         = true
+
 [dependencies.termion]
 version          = "1.0"

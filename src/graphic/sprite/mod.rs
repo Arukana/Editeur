@@ -27,6 +27,20 @@ impl Sprite {
         self.sheet.get(self.position).and_then(|draw| draw.current())
     }
 
+    pub fn set_current(
+        &mut self,
+        cell: (&Emotion, &Texel)
+    ) -> Option<()> {
+        self.sheet
+            .get_mut(self.position)
+            .and_then(|board|
+                      board.set_current(cell))
+    }
+
+    pub fn get_posture(&self) -> Option<&Position> {
+        self.sheet.get(self.position).and_then(|draw| Some(draw.get_posture()))
+    }
+
     /// The mutator method `add_position_draw` changes the position of
     /// the cell board cursor.
     pub fn add_position_draw(&mut self, position: usize) {

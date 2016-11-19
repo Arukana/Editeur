@@ -39,6 +39,31 @@ impl Draw {
         }
     }
 
+    /// The accessor method `current` returns the pointed cell.
+    pub fn current(&self) -> Option<(&Emotion, &Texel)> {
+        self.board
+            .get(self.position)
+            .and_then(|&(ref emotion, ref texel)|
+                      Some((emotion, texel)))
+    }
+
+    pub fn set_current(
+        &mut self,
+        (emotion, texel): (&Emotion, &Texel)
+    ) -> Option<()> {
+        self.board.get_mut(self.position)
+            .and_then(|&mut (ref mut cell_emotion, ref mut cell_texel)| {
+                cell_emotion.clone_from(emotion);
+                cell_texel.clone_from(texel);
+                Some(())
+            })
+    }
+
+    pub fn get_posture(&self) -> &Position {
+       &self.posture
+    }
+
+
     /// The mutator method `add_position` changes the position of
     /// the file sprite cursor.
     pub fn add_position(&mut self, position: usize) {
@@ -53,13 +78,6 @@ impl Draw {
         if let Some(pos) = self.position.checked_sub(position) {
             self.position = pos;
         }
-    }
-
-    /// The accessor method `current` returns the pointed cell.
-    pub fn current(&self) -> Option<(&Emotion, &Texel)> {
-        self.board
-            .get(self.position)
-            .and_then(|&(ref emotion, ref texel)| Some((emotion, texel)))
     }
 }
 
