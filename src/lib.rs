@@ -46,7 +46,7 @@ use std::fmt;
 
 use termion::input::{self, TermRead};
 use termion::raw::{self, IntoRawMode};
-use termion::event::{Event, Key};
+use termion::event::{Event, MouseEvent, Key};
 
 #[cfg(feature = "clipboard")]
 use clipboard::ClipboardContext;
@@ -124,13 +124,21 @@ impl Iterator for Editeur {
             .and_then(|event|
                       match event {
                           Event::Key(Key::Ctrl('q')) |
-                          Event::Key(Key::Char('q')) => None,
+                          Event::Key(Key::Char('q')) |
+                          Event::Mouse(MouseEvent::Release(0...8, 1)) => None,
 
                           #[cfg(feature = "clipboard")]
                           Event::Key(Key::Ctrl('c')) |
-                          Event::Key(Key::Char('c')) => self.kopimism.set_contents(
-                              format!("{:?}", self.graphic)
-                          ).ok(),
+                          Event::Key(Key::Char('c')) |
+                          Event::Mouse(MouseEvent::Release(10...18, 1)) => {
+                                self.kopimism.set_contents(
+                                    format!("{:?}", self.graphic)
+                                ).ok()
+                          },/*
+                          Event::Mouse(MouseEvent::Press(_, x, y @ 3...12)) |
+                          Event::Mouse(MouseEvent::Release(x, y@ 3...12)) => Some(
+                              self.graphic.set_position(x as usize, y-3 as usize)
+                          ),*/
                           Event::Key(Key::PageUp) => Some(
                               self.graphic.sub_position(1)
                           ),

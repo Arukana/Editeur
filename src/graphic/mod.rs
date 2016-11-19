@@ -276,6 +276,12 @@ impl Graphic {
         }
     }
 
+    /// The mutator method `set_position` changes the position of
+    /// the file sprite cursor.
+    pub fn set_position(&mut self, x: usize, y: usize) {
+//        self.position = x;
+    }
+
     /// The mutator method `add_position` changes the position of
     /// the file sprite cursor.
     pub fn add_position(&mut self, position: usize) {
