@@ -9,7 +9,7 @@ macro_rules! editeur_new {
             graphic: $graphic,
             output: $output,
             input: io::stdin().events(),
-            kopimism: ClipboardContext::new(),
+            kopimism: ClipboardContext::new().unwrap(),
             menu: Menu::default(),
         }
     });

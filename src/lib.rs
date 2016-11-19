@@ -65,7 +65,7 @@ pub struct Editeur {
     input: input::Events<std::io::Stdin>,
     output: input::MouseTerminal<raw::RawTerminal<io::Stdout>>,
     #[cfg(feature = "clipboard")]
-    kopimism: Option<ClipboardContext>,
+    kopimism: ClipboardContext,
     menu: Menu,
 }
 
@@ -129,7 +129,7 @@ impl Iterator for Editeur {
                           #[cfg(feature = "clipboard")]
                           Event::Key(Key::Ctrl('c')) |
                           Event::Key(Key::Char('c')) => self.kopimism.set_contents(
-                              &format("{:?}". self.graphic)
+                              format!("{:?}", self.graphic)
                           ).ok(),
                           Event::Key(Key::PageUp) => Some(
                               self.graphic.sub_position(1)
