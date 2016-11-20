@@ -11,17 +11,17 @@ pub const SPEC_MAX_XY: usize = SPEC_MAX_X * SPEC_MAX_Y;
 pub const SPEC_MAX_PRE_XY: usize = SPEC_MAX_XY - 1;
 
 pub use super::{Emotion, EmotionError};
-pub use super::{Position, PositionError};
+pub use super::{Posture, PostureError};
 pub use super::Texel;
 
-/// Position is like the Posture of the drawned persona.
+/// Posture is like the Posture of the drawned persona.
 pub struct Draw {
-    posture: Position,
+    posture: Posture,
     board: io::Cursor<[(Emotion, Texel); SPEC_MAX_XY]>,
 }
 
 impl Draw {
-    pub fn new(position: &Position,
+    pub fn new(position: &Posture,
                buf: &[(Emotion, Texel)])
                -> Result<Self> {
         if SPEC_MAX_XY.eq(&buf.len()) {
@@ -62,7 +62,7 @@ impl Draw {
             })
     }
 
-    pub fn get_posture(&self) -> &Position {
+    pub fn get_posture(&self) -> &Posture {
         &self.posture
     }
 
@@ -140,7 +140,7 @@ impl fmt::Display for Draw {
 impl fmt::Debug for Draw {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,
-               "(Position: {:?}, sprite: {:?})",
+               "(Posture: {:?}, sprite: {:?})",
                self.posture,
                self.board
                    .get_ref()

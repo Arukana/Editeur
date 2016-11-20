@@ -10,7 +10,7 @@ use std::fmt;
 use std::io;
 use std::usize;
 pub use super::emotion::{Emotion, EmotionError};
-pub use super::position::{Position, PositionError};
+pub use super::position::{Posture, PostureError};
 
 const SPEC_CAPACITY_SHEET: usize = 5;
 
@@ -39,7 +39,7 @@ impl Sprite {
             .and_then(|board| board.set_current(cell))
     }
 
-    pub fn get_posture(&self) -> Option<&Position> {
+    pub fn get_posture(&self) -> Option<&Posture> {
         self.sheet
             .get_ref()
             .get(self.get_position())

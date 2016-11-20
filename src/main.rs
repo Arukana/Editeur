@@ -7,7 +7,34 @@
 
 //! # editeur
 
-extern crate editeur;
+#![feature(slice_patterns)]
+#![feature(advanced_slice_patterns)]
+
+#![crate_type="lib"]
+#![cfg_attr(feature = "nightly", feature(plugin))]
+
+#![feature(plugin)]
+#![cfg_attr(feature = "clippy", plugin(clippy(conf_file="clippy.toml")))]
+
+#![cfg_attr(feature = "lints", plugin(clippy))]
+#![cfg_attr(feature = "lints", deny(warnings))]
+#![cfg_attr(not(any(feature = "lints", feature = "nightly")), deny())]
+
+#![deny(
+        missing_debug_implementations,
+        missing_copy_implementations,
+        trivial_casts,
+        trivial_numeric_casts,
+        unused_import_braces,
+        unused_qualifications
+)]
+
+#[cfg(feature = "clipboard")]
+extern crate clipboard;
+extern crate termion;
+
+mod editeur;
+pub mod graphic;
 
 use std::io::Write;
 

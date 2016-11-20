@@ -1,9 +1,9 @@
 mod err;
 
-pub use self::err::{PositionError, Result};
+pub use self::err::{PostureError, Result};
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
-pub enum Position {
+pub enum Posture {
     LotusHandsOnFloor,
     LyingOnSomething,
     Lotus,
@@ -12,22 +12,22 @@ pub enum Position {
     None,
 }
 
-impl Position {
+impl Posture {
     pub fn new(content: &str) -> Result<Self> {
         match content {
-            "LotusHandsOnFloor" => Ok(Position::LotusHandsOnFloor),
-            "LyingOnSomething" => Ok(Position::LyingOnSomething),
-            "Lotus" => Ok(Position::Lotus),
-            "Lying" => Ok(Position::Lying),
-            "Joke" => Ok(Position::Joke),
-            "None" => Ok(Position::None),
-            _ => Err(PositionError::UnknownPosition),
+            "LotusHandsOnFloor" => Ok(Posture::LotusHandsOnFloor),
+            "LyingOnSomething" => Ok(Posture::LyingOnSomething),
+            "Lotus" => Ok(Posture::Lotus),
+            "Lying" => Ok(Posture::Lying),
+            "Joke" => Ok(Posture::Joke),
+            "None" => Ok(Posture::None),
+            _ => Err(PostureError::UnknownPosture),
         }
     }
 }
 
-impl Default for Position {
-    fn default() -> Position {
-        Position::None
+impl Default for Posture {
+    fn default() -> Posture {
+        Posture::None
     }
 }

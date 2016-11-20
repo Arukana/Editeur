@@ -1,23 +1,23 @@
 [package]
-name            = "neko"
-version         = "0.0.1"
-authors         = ["adjivas <adjivas@users.noreply.github.com>"]
-description     = ""
-readme          = "README.md"
-keywords        = ["editor","neko", "glyphArt", "sprite", "texel"]
-license         = "GPL-3.0"
-
-[[bin]]
-name            = "editor"
-path            = "src/main.rs"
-doc             = false
-test            = false
+name             = "neko"
+version          = "0.0.1"
+authors          = ["adjivas <adjivas@users.noreply.github.com>"]
+description      = ""
+readme           = "README.md"
+keywords         = ["editor","neko", "glyphArt", "sprite", "texel"]
+license          = "GPL-3.0"
 
 [lib]
-name             = "editeur"
-path             = "src/lib.rs"
+name             = "graphic"
+path             = "src/graphic/mod.rs"
 plugin           = true
 doctest          = false
+test             = false
+
+[[bin]]
+name             = "editeur"
+path             = "src/main.rs"
+doc              = false
 test             = false
 
 [features]
