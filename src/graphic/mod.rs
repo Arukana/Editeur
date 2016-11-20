@@ -12,12 +12,12 @@ pub use self::err::{GraphicError, Result};
 use self::sprite::draw::{Draw, SPEC_MAX_XY, SPEC_MAX_X};
 use self::sprite::texel::Texel;
 use self::sprite::texel::part::Part;
-use std::collections::HashMap;
-use std::collections::VecDeque;
-use std::fs;
-use std::fmt;
-use std::io;
+
+use std::collections::{HashMap, VecDeque};
 use std::env;
+use std::fmt;
+use std::fs;
+use std::io;
 use std::io::prelude::*;
 use std::ops::Not;
 use std::ffi::OsStr;
@@ -30,18 +30,16 @@ const SPEC_CAPACITY_POSITION: usize = 25;
 /// The default capacity of Sprite dictionary by Position dictionary.
 const SPEC_CAPACITY_SPRITE: usize = 5;
 /// The sub-directory texel.
-const SPEC_SUBD_NCT: &'static str = "nct";
+const SPEC_SUBD_NCT: &'static str = "texel";
 /// The sub-directory sprite.
-const SPEC_SUBD_NCS: &'static str = "ncs";
+const SPEC_SUBD_NCS: &'static str = "sprite";
 
 #[derive(Clone, Debug)]
 pub struct Graphic {
     /// Dictionary of texel.
     texel: HashMap<Position, HashMap<(Part, Emotion), Texel>>,
-    /// Dictionary of sprite.
-    sprite: Vec<(PathBuf, Sprite)>,
-    /// Index of file.
-    position: usize,
+    /// Dictionary of primitive's sprite.
+    sprite: io::Cursor<Vec<(PathBuf, Sprite)>>,
 }
 
 impl Graphic {
@@ -126,8 +124,8 @@ impl Graphic {
 
     fn get_texel(&self,
                  position: &Position,
-                 tuple: &(Part, Emotion))
-                 -> Option<Texel> {
+                 tuple: &(Part, Emotion)
+    ) -> Option<Texel> {
         self.texel.get(position).and_then(|sprite|
             sprite.get(tuple).and_then(|texel| Some(*texel))
         )
@@ -136,8 +134,8 @@ impl Graphic {
     /// The function `insert_texel` insert a texel.
     fn insert_texel(&mut self,
                     (position, part, emotion): (Position, Part, Emotion),
-                    val: Texel)
-                    -> Option<Texel> {
+                    val: Texel
+    ) -> Option<Texel> {
         self.texel.entry(position)
             .or_insert_with(|| HashMap::with_capacity(SPEC_CAPACITY_SPRITE))
             .insert((part, emotion), val)
@@ -145,7 +143,7 @@ impl Graphic {
 
     /// The function `insert_sprite` insert a sprite.
     fn insert_sprite(&mut self, (file, sprite): (&Path, Sprite)) {
-        self.sprite.push((file.to_path_buf(), sprite))
+        self.sprite.get_mut().push((file.to_path_buf(), sprite))
     }
 
     fn line_with_character(
@@ -276,50 +274,62 @@ impl Graphic {
         }
     }
 
+    /// The accessor method `get_position` returns the position of
+    /// the file sprite cursor.
+    fn get_position(&self) -> usize {
+        self.sprite.position() as usize
+    }
+
     /// The mutator method `set_position` changes the position of
     /// the file sprite cursor.
-    pub fn set_position(&mut self, x: usize, y: usize) {
-//        self.position = x;
+    pub fn set_position(&mut self, position: usize) {
+        self.sprite.set_position(position as u64);
     }
 
     /// The mutator method `add_position` changes the position of
     /// the file sprite cursor.
     pub fn add_position(&mut self, position: usize) {
-        if let Some(pos) = self.position.checked_add(position) {
-                if pos < self.sprite.len() {
-                self.position = pos;
-            }
+        match (self.get_position().checked_add(position),
+               self.sprite.get_ref().len()) {
+            (Some(pos), len) if pos < len => self.set_position(pos),
+            _ => self.set_position(0),
         }
     }
 
     /// The mutator method `sub_position` changes the position of
     /// the file sprite cursor.
     pub fn sub_position(&mut self, position: usize) {
-        if let Some(pos) = self.position.checked_sub(position) {
-            self.position = pos;
+        match (self.get_position().checked_sub(position),
+               self.sprite.get_ref().len()) {
+            (Some(pos), _) => self.set_position(pos),
+            (_, len) => self.set_position(len),
         }
     }
 
     /// The mutator method `add_position_sprite_draw` changes the position of
     /// the cell board cursor.
     pub fn add_position_sprite_draw(&mut self, position: usize) {
-        if let Some(&mut (_, ref mut sprite)) = self.sprite.get_mut(self.position) {
-            sprite.add_position_draw(position);
-        }
+        let current_position: usize = self.get_position();
+        self.sprite.get_mut()
+            .get_mut(current_position)
+            .and_then(|&mut (_, ref mut sprite)|
+                      sprite.add_position_draw(position));
     }
 
     /// The mutator method `sub_position_sprite_draw` changes the position of
     /// the cell board cursor.
     pub fn sub_position_sprite_draw(&mut self, position: usize) {
-        if let Some(&mut (_, ref mut sprite)) = self.sprite.get_mut(self.position) {
-            sprite.sub_position_draw(position);
-        }
+        let current_position: usize = self.get_position();
+        self.sprite.get_mut()
+            .get_mut(current_position)
+            .and_then(|&mut (_, ref mut sprite)|
+                      sprite.sub_position_draw(position));
     }
 
     pub fn get_cell(
         &self, position: usize,
     ) -> Option<(&(Part, Emotion), &Texel)> {
-        self.sprite.get(self.position)
+        self.sprite.get_ref().get(self.get_position())
             .and_then(|&(_, ref sprite)|
                       sprite.get_posture()
                       .and_then(|posture|
@@ -333,11 +343,12 @@ impl Graphic {
     }
 
     pub fn set_cell_draw(&mut self, position: usize) {
+        let current_position: usize = self.get_position();
         self.get_cell(position)
             .and_then(|(&(_, ref emotion), texel)|
                       Some((*emotion, *texel))
             ).and_then(|(emotion, texel)|
-                       self.sprite.get_mut(self.position)
+                       self.sprite.get_mut().get_mut(current_position)
                        .and_then(|&mut (_, ref mut sprite)|
                                  sprite.set_current((&emotion, &texel))));
     }
@@ -347,39 +358,40 @@ impl fmt::Display for Graphic {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.sprite
-               .get(self.position)
+               .get_ref()
+               .get(self.get_position())
                .and_then(|&(ref path, ref sprite)|
-                         sprite.get_posture()
-                         .and_then(|posture| Some({
-                             let current: Option<(&Emotion, &Texel)> = sprite.current();
-                             format!("{:?}\n\r{}{}",
-                                     path.file_stem().unwrap_or_default(),
-                                     sprite,
-                                     self.texel.get(posture)
-                                     .and_then(|texels|
-                                               Some(texels.iter()
-                                                    .collect::<Vec<(&(Part, Emotion), &Texel)>>()
-                                                    .as_slice()
-                                                    .chunks(SPEC_MAX_X)
-                                                    .map(|line|
-                                                         format!("{}{}{}",
-                                                                 line.iter()
-                                                                 .map(|&(&(_, ref emotion), ref texel)|
-                                                                      format_cell!(texel, current, Some((&emotion, &texel)))
-                                                                 ).collect::<String>(),
-                                                                 line.iter()
-                                                                 .map(|&(&(_, ref emotion), ref texel)|
-                                                                      format_cell!(texel, current, Some((&emotion, &texel)))
-                                                                 ).collect::<String>(),
-                                                                 line.iter()
-                                                                 .map(|&(&(_, ref emotion), ref texel)|
-                                                                      format_cell!(texel, current, Some((&emotion, &texel)))
-                                                                 ).collect::<String>()
-                                                         )
-                                                    )
-                                                    .collect::<String>())
-                                     ).unwrap_or_default())
-                         }))).unwrap_or_default())
+                    sprite.get_posture()
+                    .and_then(|posture| Some({
+                        let current: Option<(&Emotion, &Texel)> = sprite.current();
+                        format!("{:?}\n\r{}{}",
+                            path.file_stem().unwrap_or_default(),
+                            sprite,
+                            self.texel.get(posture)
+                            .and_then(|texels|
+                                Some(texels.iter()
+                                    .collect::<Vec<(&(Part, Emotion), &Texel)>>()
+                                    .as_slice()
+                                    .chunks(SPEC_MAX_X)
+                                    .map(|line|
+                                        format!("{}{}{}",
+                                            line.iter()
+                                            .map(|&(&(_, ref emotion), ref texel)|
+                                                format_cell!(texel, current, Some((&emotion, &texel)))
+                                            ).collect::<String>(),
+                                            line.iter()
+                                            .map(|&(&(_, ref emotion), ref texel)|
+                                                format_cell!(texel, current, Some((&emotion, &texel)))
+                                            ).collect::<String>(),
+                                            line.iter()
+                                            .map(|&(&(_, ref emotion), ref texel)|
+                                                format_cell!(texel, current, Some((&emotion, &texel)))
+                                            ).collect::<String>()
+                                        )
+                                    )
+                                    .collect::<String>())
+                        ).unwrap_or_default())
+            }))).unwrap_or_default())
     }
 }
 
@@ -390,8 +402,7 @@ impl Default for Graphic {
     fn default() -> Graphic {
         Graphic {
             texel: HashMap::with_capacity(SPEC_CAPACITY_POSITION),
-            sprite: Vec::with_capacity(SPEC_CAPACITY_SPRITE),
-            position: 0,
+            sprite: io::Cursor::new(Vec::with_capacity(SPEC_CAPACITY_SPRITE)),
         }
     }
 }

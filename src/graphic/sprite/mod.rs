@@ -2,11 +2,13 @@ pub mod texel;
 pub mod draw;
 mod err;
 
-use std::fmt;
 
 use self::draw::Draw;
 pub use self::err::{SpriteError, Result};
 pub use self::texel::Texel;
+use std::fmt;
+use std::io;
+use std::usize;
 pub use super::emotion::{Emotion, EmotionError};
 pub use super::position::{Position, PositionError};
 
@@ -14,64 +16,113 @@ const SPEC_CAPACITY_SHEET: usize = 5;
 
 #[derive(Clone, Debug)]
 pub struct Sprite {
-    sheet: Vec<Draw>,
-    position: usize,
+    sheet: io::Cursor<Vec<Draw>>,
 }
 
 impl Sprite {
     pub fn insert(&mut self, draw: Draw) {
-        self.sheet.push(draw);
+        self.sheet.get_mut().push(draw);
     }
 
     pub fn current(&self) -> Option<(&Emotion, &Texel)> {
-        self.sheet.get(self.position).and_then(|draw| draw.current())
+        self.sheet
+            .get_ref()
+            .get(self.get_position())
+            .and_then(|draw| draw.current())
     }
 
-    pub fn set_current(
-        &mut self,
-        cell: (&Emotion, &Texel)
-    ) -> Option<()> {
+    pub fn set_current(&mut self, cell: (&Emotion, &Texel)) -> Option<()> {
+        let position: usize = self.get_position();
         self.sheet
-            .get_mut(self.position)
-            .and_then(|board|
-                      board.set_current(cell))
+            .get_mut()
+            .get_mut(position)
+            .and_then(|board| board.set_current(cell))
     }
 
     pub fn get_posture(&self) -> Option<&Position> {
-        self.sheet.get(self.position).and_then(|draw| Some(draw.get_posture()))
+        self.sheet
+            .get_ref()
+            .get(self.get_position())
+            .and_then(|draw| Some(draw.get_posture()))
     }
 
-    /// The mutator method `add_position_draw` changes the position of
-    /// the cell board cursor.
-    pub fn add_position_draw(&mut self, position: usize) {
-        if let Some(ref mut draw) = self.sheet.get_mut(self.position) {
-            draw.add_position(position);
+    /// The accessor method `get_position` returns the position of
+    /// the draw sheet cursor.
+    fn get_position(&self) -> usize {
+        self.sheet.position() as usize
+    }
+
+    /// The mutator method `set_position` changes the position of
+    /// the file sprite cursor.
+    fn set_position(&mut self, position: usize) {
+        self.sheet.set_position(position as u64);
+    }
+
+    /// The mutator method `add_position_draw` increments the position of
+    /// the draw sheet cursor.
+    pub fn add_position(&mut self, position: usize) -> Option<()> {
+        match (self.get_position().checked_add(position),
+               self.sheet.get_ref().len()) {
+            (Some(pos), len) if pos < len => Some(self.set_position(pos)),
+            _ => None,
         }
     }
 
-    /// The mutator method `sub_position_draw` changes the position of
+    /// The mutator method `sub_position_draw` decrements the position of
+    /// the draw sheet cursor.
+    pub fn sub_position(&mut self, position: usize) -> Option<()> {
+        self.get_position()
+            .checked_sub(position)
+            .and_then(|pos| Some(self.set_position(pos)))
+    }
+
+    /// The mutator method `add_position_draw` increments the position of
     /// the cell board cursor.
-    pub fn sub_position_draw(&mut self, position: usize) {
-        if let Some(ref mut draw) = self.sheet.get_mut(self.position) {
-            draw.sub_position(position);
-        }
+    pub fn add_position_draw(&mut self, position: usize) -> Option<()> {
+        let current_position: usize = self.get_position();
+        self.sheet
+            .get_mut()
+            .get_mut(current_position)
+            .and_then(|ref mut draw| draw.add_position(position))
+            .or(self.add_position(1))
+    }
+
+    /// The mutator method `sub_position_draw` decrements the position of
+    /// the cell board cursor.
+    pub fn sub_position_draw(&mut self, position: usize) -> Option<()> {
+        let current_position: usize = self.get_position();
+        self.sheet
+            .get_mut()
+            .get_mut(current_position)
+            .and_then(|ref mut draw| draw.sub_position(position))
+            .or(self.sub_position(1))
     }
 }
 
 impl fmt::Display for Sprite {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.sheet.get(self.position) {
-            Some(sheet) => write!(f, "{}", sheet),
-            None => write!(f, "\n\r"),
-        }
+        write!(f, "{}",
+               self.sheet
+                   .get_ref()
+                   .get(self.get_position())
+                   .and_then(|sheet| Some(format!("{}", sheet)))
+                   .unwrap_or_default())
+    }
+}
+
+impl<'a> IntoIterator for &'a Sprite {
+    type Item = &'a Draw;
+    type IntoIter = ::std::slice::Iter<'a, Draw>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.sheet.get_ref().into_iter()
     }
 }
 
 impl Default for Sprite {
     fn default() -> Sprite {
         Sprite {
-            sheet: Vec::with_capacity(SPEC_CAPACITY_SHEET),
-            position: 0,
+            sheet: io::Cursor::new(Vec::with_capacity(SPEC_CAPACITY_SHEET)),
         }
     }
 }

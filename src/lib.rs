@@ -134,11 +134,7 @@ impl Iterator for Editeur {
                                 self.kopimism.set_contents(
                                     format!("{:?}", self.graphic)
                                 ).ok()
-                          },/*
-                          Event::Mouse(MouseEvent::Press(_, x, y @ 3...12)) |
-                          Event::Mouse(MouseEvent::Release(x, y@ 3...12)) => Some(
-                              self.graphic.set_position(x as usize, y-3 as usize)
-                          ),*/
+                          },
                           Event::Key(Key::PageUp) => Some(
                               self.graphic.sub_position(1)
                           ),

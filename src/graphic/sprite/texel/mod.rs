@@ -27,8 +27,8 @@ impl Texel {
     }
 
     /// The accessor method `get_glyph` returns the Texel Glyph.
-    pub fn get_glyph(&self) -> &char {
-        &self.1
+    pub fn get_glyph(&self) -> char {
+        self.1
     }
 }
 

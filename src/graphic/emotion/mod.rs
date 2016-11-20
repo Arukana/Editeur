@@ -13,13 +13,19 @@ pub enum Emotion {
 
 impl Emotion {
     pub fn new(content: &str) -> Result<Self> {
-      match content {
-        "Happy" => Ok(Emotion::Happy),
-        "Malicious" => Ok(Emotion::Malicious),
-        "None" => Ok(Emotion::None),
-        _ => Err(EmotionError::UnknownEmotion),
+        match content {
+            "Happy" => Ok(Emotion::Happy),
+            "Malicious" => Ok(Emotion::Malicious),
+            "None" => Ok(Emotion::None),
+            _ => Err(EmotionError::UnknownEmotion),
+        }
     }
-  }
+
+    /// The accessor method `is_none` returns a boolean
+    /// for None, axiom of emotion.
+    pub fn is_none(&self) -> bool {
+        self.eq(&Emotion::None)
+    }
 }
 
 impl fmt::Display for Emotion {

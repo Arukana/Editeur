@@ -1,8 +1,8 @@
 pub mod err;
 
-use std::fmt;
 
 pub use self::err::{PartError, Result};
+use std::fmt;
 
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum Part {
@@ -24,10 +24,12 @@ impl Part {
 
 impl fmt::Display for Part {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-            Part::EyeLeft => "El",
-            Part::EyeRight => "Er",
-            Part::None => "__",
-        })
+        write!(f,
+               "{}",
+               match *self {
+                   Part::EyeLeft => "El",
+                   Part::EyeRight => "Er",
+                   Part::None => "__",
+               })
     }
 }
