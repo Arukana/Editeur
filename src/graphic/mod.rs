@@ -25,6 +25,8 @@ pub mod emotion;
 pub mod position;
 mod err;
 
+pub mod prelude;
+
 use self::emotion::Emotion;
 use self::position::Posture;
 use self::sprite::Sprite;
@@ -46,9 +48,9 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 /// The default capacity of Posture dictionary.
-const SPEC_CAPACITY_POSITION: usize = 25;
+pub const SPEC_CAPACITY_POSITION: usize = 25;
 /// The default capacity of Sprite dictionary by Posture dictionary.
-const SPEC_CAPACITY_SPRITE: usize = 5;
+pub const SPEC_CAPACITY_SPRITE: usize = 5;
 /// The sub-directory texel.
 const SPEC_SUBD_NCT: &'static str = "texel";
 /// The sub-directory sprite.
