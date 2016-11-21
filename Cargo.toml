@@ -14,7 +14,7 @@ keywords         = ["character", "expression", "editor"]
 license          = "GPL-3.0"
 
 [lib]
-name             = "graphic"
+name             = "editeur"
 path             = "src/graphic/mod.rs"
 plugin           = true
 doctest          = false
