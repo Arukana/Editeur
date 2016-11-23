@@ -4,22 +4,20 @@ pub use self::err::{PostureError, Result};
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum Posture {
-    LotusHandsOnFloor,
-    LyingOnSomething,
-    Lotus,
+    Bust,
+ //   Lotus,
     Lying,
-    Joke,
+    Seiza,
     None,
 }
 
 impl Posture {
     pub fn new(content: &str) -> Result<Self> {
         match content {
-            "LotusHandsOnFloor" => Ok(Posture::LotusHandsOnFloor),
-            "LyingOnSomething" => Ok(Posture::LyingOnSomething),
-            "Lotus" => Ok(Posture::Lotus),
+            "Bust" => Ok(Posture::Bust),
+          //  "Lotus" => Ok(Posture::Lotus),
             "Lying" => Ok(Posture::Lying),
-            "Joke" => Ok(Posture::Joke),
+            "Seiza" => Ok(Posture::Seiza),
             "None" => Ok(Posture::None),
             _ => Err(PostureError::UnknownPosture),
         }
