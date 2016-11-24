@@ -52,11 +52,11 @@ pub const SPEC_CAPACITY_POSITION: usize = 25;
 /// The default capacity of Sprite dictionary by Posture dictionary.
 pub const SPEC_CAPACITY_SPRITE: usize = 5;
 /// The sub-directory texel.
-const SPEC_SUBD_NCT: &'static str = "texel";
+pub const SPEC_SUBD_NCT: &'static str = "texel";
 /// The sub-directory sprite.
-const SPEC_SUBD_NCS: &'static str = "sprite";
+pub const SPEC_SUBD_NCS: &'static str = "sprite";
 /// The first directory.
-const SPEC_ROOT: &'static str = ".neko";
+pub const SPEC_ROOT: &'static str = ".neko";
 
 #[derive(Clone, Debug)]
 pub struct Graphic {
@@ -137,7 +137,7 @@ impl Graphic {
 
     /// The accessor method `nct_with_ncs` returns a couple
     /// of texel and sprite sub-repositories.
-    pub fn nct_with_ncs (
+    pub fn nct_with_ncs(
         &mut self,
     ) -> Result<(PathBuf, PathBuf)> {
         match (self.get_nct(), self.get_ncs()) {
@@ -179,24 +179,17 @@ impl Graphic {
     }
 
     fn line_with_character(
-        &mut self, content: &str, pt: &str, emotion: &str, character: &str
+        &mut self, posture: &str, part: &str, emotion: &str, character: char
     ) -> Result<()> {
-        match (Posture::new(content),
-               Part::new(pt),
-               Emotion::new(emotion),
-               character.chars().next()) {
-            (Err(why), _, _, _) => Err(GraphicError::Posture(why)),
-            (_, Err(why), _, _) => Err(GraphicError::Part(why)),
-            (_, _, Err(why), _) => Err(GraphicError::Emotion(why)),
-            (_, _, _, None) => Err(GraphicError::Glyph),
-            (Ok(position), Ok(part), Ok(emotion), Some(glyph)) => {
-                match Texel::new(pt, glyph) {
-                    Err(why) => Err(GraphicError::Texel(why)),
-                    Ok(texel) => {
-                        self.insert_texel((position, part, emotion), texel);
-                        Ok(())
-                    },
-                }
+        match (Posture::new(posture),
+               Texel::new(part, character),
+               Emotion::new(emotion)) {
+            (Err(why), _, _) => Err(GraphicError::Posture(why)),
+            (_, Err(why), _) => Err(GraphicError::Texel(why)),
+            (_, _, Err(why)) => Err(GraphicError::Emotion(why)),
+            (Ok(posture), Ok(texel), Ok(emotion)) => {
+                self.insert_texel((posture, *texel.get_part(), emotion), texel);
+                Ok(())
             },
         }
     }
@@ -204,21 +197,34 @@ impl Graphic {
     fn texel_with_line(
         &mut self, line: &str
     ) -> Result<()> {
-        let words: Vec<&str> = line.split(|c| "('): [,]".contains(c))
-            .filter(|x| x.is_empty().not())
-            .collect::<Vec<&str>>();
-        match &words[..] {
-            &[pt, character, emotion, ref positions..] => {
-                if let Some(why) = positions.iter()
-                                            .filter_map(|content: &&str|
-                        self.line_with_character(content, pt, emotion, character).err()
-                ).next() {
-                    Err(why)
-                } else {
-                    Ok(())
-                }
+        if let Some(position) = line.find(':') {
+            let (part_for_characters, emotion_and_postures) = line.split_at(position);
+            let (part_for_characters, emotion_and_postures) = (
+                part_for_characters.split(|c| "(',) ".contains(c))
+                    .filter(|x| x.is_empty().not())
+                    .collect::<Vec<&str>>(),
+                emotion_and_postures.split(|c| ":[,] ".contains(c))
+                    .filter(|x| x.is_empty().not())
+                    .collect::<Vec<&str>>(),
+            );
+
+            match (&part_for_characters[..], &emotion_and_postures[..]) {
+                (&[part, ref characters..], &[emotion, ref postures..]) => {
+                    postures.iter()
+                        .filter_map(|posture: &&str|
+                                    characters.iter()
+                                    .filter_map(|character: &&str|
+                                                character.chars().next()
+                                                .and_then(|glyph|
+                                                          self.line_with_character(
+                                                              posture, part, emotion, glyph).err()))
+                                    .next().and_then(|why| Some(Err(why))))
+                        .next().unwrap_or_else(|| Ok(()))
+                },
+                _ => Err(GraphicError::SyntaxTexel),
             }
-            _ => unimplemented!(),
+        } else {
+            Err(GraphicError::SyntaxTexel)
         }
     }
 
@@ -389,8 +395,8 @@ impl Graphic {
         let current_position: usize = self.get_position();
         self.get_cell(position)
             .and_then(|(&(_, ref emotion), texel)|
-                      Some((*emotion, *texel))
-            ).and_then(|(emotion, texel)|
+                      Some((*emotion, *texel)))
+            .and_then(|(emotion, texel)|
                        self.sprite.get_mut().get_mut(current_position)
                        .and_then(|&mut (_, ref mut sprite)|
                                  sprite.set_current((&emotion, &texel))));

@@ -63,7 +63,7 @@ impl fmt::Display for Part {
                match *self {
                    Part::EyeLeft => "El",
                    Part::EyeRight => "Er",
-                   Part::None => "__",
+                   _ => "__",
                })
     }
 }
