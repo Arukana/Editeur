@@ -63,6 +63,23 @@ impl fmt::Display for Part {
                match *self {
                    Part::EyeLeft => "El",
                    Part::EyeRight => "Er",
+                   Part::EarLeft => "Al",
+                   Part::EarRight => "Ar",
+                   Part::HandLeft => "Hl",
+                   Part::HandRight => "Hr",
+                   Part::Mouth => "Mo",
+                   Part::Tail => "Ta",
+
+                   Part::Lantern => "La",
+                   Part::WoollBall => "Wb",
+                   Part::Bell => "Be",
+                   Part::Heart => "He",
+                   Part::Hearts => "Hs",
+                   Part::QuestionMark => "Qm",
+                   Part::QuestionMarks => "Qs",
+                   Part::ExclamationMark => "Xm",
+                   Part::ExclamationMarks => "Xs",
+
                    Part::None => "__",
                })
     }
