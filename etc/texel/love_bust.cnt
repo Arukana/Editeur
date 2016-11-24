@@ -1,0 +1,15 @@
+EyeLeft('', ''):Bust [Love, Misunderstanding]
+EyeRight(''):Bust [Love, Misunderstanding]
+EarLeft('', ''):Bust [Love, Misunderstanding]
+EarRight(''):Bust [Love, Misunderstanding]
+Mouth('', ''):Bust [Love]
+
+EyeLeft(''):Bust [Misunderstanding]
+EyeRight(''):Bust [Love, Misunderstanding]
+EarLeft('', ''):Bust []
+EarRight(''): Bust []
+Mouth('', ''):Bust [Misunderstanding]
+
+//Items
+Hearts('', '', '', '', '', ''):Bust [Love, Happy, Sleepy]
+QuestionMarks('', '', '', '', '', ''):Bust [Angry, Misunderstanding, Sleepy]
