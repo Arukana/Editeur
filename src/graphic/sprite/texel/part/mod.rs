@@ -71,7 +71,7 @@ impl fmt::Display for Part {
                    Part::Tail => "Ta",
 
                    Part::Lantern => "La",
-                   Part::WoollBall => "Wb",
+                   Part::WoolBall => "Wb",
                    Part::Bell => "Be",
                    Part::Heart => "He",
                    Part::Hearts => "Hs",
