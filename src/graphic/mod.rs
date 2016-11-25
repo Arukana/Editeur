@@ -237,6 +237,7 @@ impl Graphic {
                 if let Some(why) = reader.filter_map(|line: io::Result<String>|
                        match line {
                            Err(why) => Err(GraphicError::ReadFile(why)),
+                           Ok(ref line) if line.is_empty() => Ok(()),
                            Ok(line) => self.texel_with_line(&line),
                        }.err()
                 ).next() {
