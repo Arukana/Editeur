@@ -39,7 +39,7 @@ pub enum GraphicError {
     /// Can't found the glyph of texel.
     Glyph,
     /// Can't found the texel.
-    FoundTexel,
+    FoundTexel(String),
     /// Unvalid texel syntax.
     SyntaxTexel(String),
 }
@@ -69,7 +69,7 @@ impl Error for GraphicError {
             GraphicError::Part(_) => "The Part interface has meet an error.",
             GraphicError::Home => "Can't found the $HOME environement variable.",
             GraphicError::Glyph => "Can't found the glyph of texel.",
-            GraphicError::FoundTexel => "Can't found the texel.",
+            GraphicError::FoundTexel(ref name) => name,
             GraphicError::SyntaxTexel(ref name) => name,
         }
     }

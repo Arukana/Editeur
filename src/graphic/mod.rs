@@ -267,7 +267,7 @@ impl Graphic {
                 (Ok(part), Ok(emotion)) => {
                     match self.get_texel(posture, &(part, emotion)) {
                         Some(texel) => Ok(draw.push((emotion, *texel))),
-                        None => Err(GraphicError::FoundTexel),
+                        None => Err(GraphicError::FoundTexel(format!("{}:{}", part, emotion))),
                     }
                 },
             }.err()
