@@ -24,7 +24,8 @@ impl Draw {
     pub fn new(position: &Posture,
                buf: &[(Emotion, Texel)])
                -> Result<Self> {
-        if SPEC_MAX_XY.eq(&buf.len()) {
+        let len: usize = buf.len();
+        if len.eq(&SPEC_MAX_XY) {
             unsafe {
                 let mut line: [(Emotion, Texel); SPEC_MAX_XY] =
                     mem::uninitialized();
@@ -36,7 +37,7 @@ impl Draw {
                 })
             }
         } else {
-            Err(DrawError::OutOfSize)
+            Err(DrawError::OutOfSize(format!("{}/{}", len, SPEC_MAX_XY)))
         }
     }
 

@@ -6,9 +6,9 @@ pub type Result<T> = ::std::result::Result<T, DrawError>;
 
 /// The enum `DrawError` defines the possible errors
 /// from constructor Position.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum DrawError {
-    OutOfSize,
+    OutOfSize(String),
 }
 
 impl fmt::Display for DrawError {
@@ -23,7 +23,9 @@ impl Error for DrawError {
     /// The function `description` returns a short description of
     /// the error.
     fn description(&self) -> &str {
-        "The slice is out of size."
+        match *self {
+            DrawError::OutOfSize(ref size) => size,
+        }
     }
 
     /// The function `cause` returns the lower-level cause of

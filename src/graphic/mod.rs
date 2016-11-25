@@ -85,9 +85,10 @@ impl Graphic {
                                 Err(why)
                         } else if let Some(why) = entry_ncs.filter_map(|sprite|
                                                                sprite.ok())
-                                                           .filter_map(|entry|
+                                                           .filter_map(|entry| {
+                                                               println!("{:?}", entry.path());
                             manager.insert_from_spritefile(&entry.path()).err()
-                        ).next() {
+                        }).next() {
                             Err(why)
                         } else {
                             Ok(manager)
@@ -267,7 +268,7 @@ impl Graphic {
                 (Ok(part), Ok(emotion)) => {
                     match self.get_texel(posture, &(part, emotion)) {
                         Some(texel) => Ok(draw.push((emotion, *texel))),
-                        None => Err(GraphicError::FoundTexel(format!("{}:{}", part, emotion))),
+                        None => Err(GraphicError::FoundTexel(format!("{}:{}", pair[0], pair[1]))),
                     }
                 },
             }.err()
@@ -301,6 +302,7 @@ impl Graphic {
                     match Posture::new(words.pop_front().unwrap()) {
                         Err(why) => Err(GraphicError::Posture(why)),
                         Ok(posture) => {
+                            println!("{:?}", file);
                             self.sprite_with_draw(
                                 &mut sprite, &posture, &words
                             ).and_then(|()|
