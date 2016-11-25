@@ -51,7 +51,7 @@ impl Part {
             "ExclamationMarks" => Ok(Part::ExclamationMarks),
 
             "None" => Ok(Part::None),
-            _ => Err(PartError::UnknownPart),
+            name => Err(PartError::UnknownPart(name.to_string())),
         }
     }
 }

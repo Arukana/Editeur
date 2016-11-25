@@ -29,7 +29,7 @@ impl Emotion {
             "Sleepy" => Ok(Emotion::Sleepy),
             "Speechless" => Ok(Emotion::Speechless),
             "None" => Ok(Emotion::None),
-            _ => Err(EmotionError::UnknownEmotion),
+            name => Err(EmotionError::UnknownEmotion(name.to_string())),
         }
     }
 

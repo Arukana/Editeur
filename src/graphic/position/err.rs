@@ -5,16 +5,16 @@ pub type Result<T> = ::std::result::Result<T, PostureError>;
 
 /// The enum `PostureError` defines the possible errors
 /// from constructor Posture.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum PostureError {
-    UnknownPosture,
+    UnknownPosture(String),
 }
 
 impl fmt::Display for PostureError {
     /// The function `fmt` formats the value using
     /// the given formatter.
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self)
+    fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
+        Ok(())
     }
 }
 
@@ -23,7 +23,7 @@ impl Error for PostureError {
     /// the error.
     fn description(&self) -> &str {
         match *self {
-            PostureError::UnknownPosture => "The posture value is unknown.",
+            PostureError::UnknownPosture(ref name) => name,
         }
     }
 
