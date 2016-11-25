@@ -41,7 +41,7 @@ pub enum GraphicError {
     /// Can't found the texel.
     FoundTexel,
     /// Unvalid texel syntax.
-    SyntaxTexel,
+    SyntaxTexel(String),
 }
 
 impl fmt::Display for GraphicError {
@@ -70,7 +70,7 @@ impl Error for GraphicError {
             GraphicError::Home => "Can't found the $HOME environement variable.",
             GraphicError::Glyph => "Can't found the glyph of texel.",
             GraphicError::FoundTexel => "Can't found the texel.",
-            GraphicError::SyntaxTexel => "Unvalid texel syntax.",
+            GraphicError::SyntaxTexel(ref name) => name,
         }
     }
 

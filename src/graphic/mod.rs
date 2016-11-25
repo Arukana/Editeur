@@ -221,10 +221,10 @@ impl Graphic {
                                     .next().and_then(|why| Some(Err(why))))
                         .next().unwrap_or_else(|| Ok(()))
                 },
-                _ => Err(GraphicError::SyntaxTexel),
+                _ => Err(GraphicError::SyntaxTexel(line.to_string())),
             }
         } else {
-            Err(GraphicError::SyntaxTexel)
+            Err(GraphicError::SyntaxTexel(line.to_string()))
         }
     }
 
