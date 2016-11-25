@@ -5,16 +5,16 @@ pub type Result<T> = ::std::result::Result<T, PartError>;
 
 /// The enum `PartError` defines the possible errors
 /// from constructor Part.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum PartError {
-    UnknownPart,
+    UnknownPart(String),
 }
 
 impl fmt::Display for PartError {
     /// The function `fmt` formats the value using
     /// the given formatter.
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self)
+    fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
+        Ok(())
     }
 }
 
@@ -23,7 +23,7 @@ impl Error for PartError {
     /// the error.
     fn description(&self) -> &str {
         match *self {
-            PartError::UnknownPart => "The texel value is unknown.",
+            PartError::UnknownPart(ref name) => name,
         }
     }
 

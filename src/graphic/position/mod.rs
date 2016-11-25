@@ -17,7 +17,7 @@ impl Posture {
             "Lying" => Ok(Posture::Lying),
             "Seiza" => Ok(Posture::Seiza),
             "None" => Ok(Posture::None),
-            _ => Err(PostureError::UnknownPosture),
+            name => Err(PostureError::UnknownPosture(name.to_string())),
         }
     }
 }

@@ -7,7 +7,7 @@ pub type Result<T> = ::std::result::Result<T, TexelError>;
 
 /// The enum `TexelError` defines the possible errors
 /// from constructor Texel.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum TexelError {
     PartFail(PartError),
     ForbiddenGlyph(char),
@@ -16,8 +16,8 @@ pub enum TexelError {
 impl fmt::Display for TexelError {
     /// The function `fmt` formats the value using
     /// the given formatter.
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self)
+    fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
+        Ok(())
     }
 }
 
