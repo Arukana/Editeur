@@ -173,3 +173,4 @@ impl Clone for Draw {
         self.board.get_mut().copy_from_slice(source.board.get_ref());
     }
 }
+

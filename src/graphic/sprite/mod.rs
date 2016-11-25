@@ -2,7 +2,7 @@ pub mod texel;
 pub mod draw;
 mod err;
 
-
+pub use self::draw::SPEC_MAX_XY;
 use self::draw::Draw;
 pub use self::err::{SpriteError, Result};
 pub use self::texel::Texel;

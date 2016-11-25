@@ -106,9 +106,11 @@ impl Iterator for Editeur {
                     Event::Key(Key::End) => Some(
                         self.graphic.end_position(0)
                     ),
+                    Event::Key(Key::Char('H')) |
                     Event::Key(Key::PageUp) => Some(
                         self.graphic.sub_position(1)
                     ),
+                    Event::Key(Key::Char('L')) |
                     Event::Key(Key::PageDown) => Some(
                         self.graphic.add_position(1)
                     ),

@@ -167,8 +167,11 @@ impl Graphic {
     /// The function `insert_texel` insert a texel.
     fn insert_texel(&mut self,
                     (position, part, emotion): (Posture, Part, Emotion),
-                    val: Texel
+                    mut val: Texel,
     ) -> Option<Texel> {
+        if let Some(ref texel) = self.get_texel(&position, &(part, emotion)) {
+            val.clone_from(texel);
+        }
         self.texel.entry(position)
             .or_insert_with(|| HashMap::with_capacity(SPEC_CAPACITY_SPRITE))
             .insert((part, emotion), val)
@@ -342,8 +345,8 @@ impl Graphic {
     pub fn sub_position(&mut self, position: usize) {
         match (self.get_position().checked_sub(position),
                self.sprite.get_ref().len()) {
+            (None, len) => self.set_position(len),
             (Some(pos), _) => self.set_position(pos),
-            (_, len) => self.set_position(len),
         }
     }
 
