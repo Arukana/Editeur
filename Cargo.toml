@@ -1,17 +1,18 @@
 [package]
 name             = "editeur"
 version          = "0.1.0"
-authors         = [
+authors          = [
         "adjivas <adjivas@users.noreply.github.com>",
         "brezaire <voncay@users.noreply.github.com>",
         "jpepin <limaconoob@users.noreply.github.com>"
 ]
-description     = ""
-documentation   = "https://arukana.github.io/Editeur/editeur"
-repository      = "https://github.com/arukana/Editeur.git"
-readme          = "README.md"
+description      = "Character expression editor"
+documentation    = "https://arukana.github.io/Editeur/editeur"
+repository       = "https://github.com/arukana/Editeur.git"
+readme           = "README.md"
 keywords         = ["character", "expression", "editor"]
 license          = "GPL-3.0"
+build            = "build.rs"
 
 [lib]
 name             = "editeur"
