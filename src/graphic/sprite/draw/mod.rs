@@ -5,8 +5,8 @@ use std::fmt;
 use std::io;
 use std::mem;
 
-pub const SPEC_MAX_X: usize = 7;
-pub const SPEC_MAX_Y: usize = 10;
+pub const SPEC_MAX_X: usize = 10;
+pub const SPEC_MAX_Y: usize = 5;
 pub const SPEC_MAX_XY: usize = SPEC_MAX_X * SPEC_MAX_Y;
 pub const SPEC_MAX_PRE_XY: usize = SPEC_MAX_XY - 1;
 
