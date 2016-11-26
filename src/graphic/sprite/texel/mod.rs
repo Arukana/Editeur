@@ -51,7 +51,7 @@ impl Texel {
         self.position
     }
 
-    fn set_position(&mut self, position: usize) {
+    pub fn set_position(&mut self, position: usize) {
         self.position = position;
     }
 }

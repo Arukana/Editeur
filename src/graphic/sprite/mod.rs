@@ -46,6 +46,10 @@ impl Sprite {
             .and_then(|draw| Some(draw.get_posture()))
     }
 
+    pub fn get_current_draw(&self) -> Option<&Draw> {
+        self.sheet.get_ref().get(self.get_position())
+    }
+
     /// The accessor method `get_position` returns the position of
     /// the draw sheet cursor.
     fn get_position(&self) -> usize {

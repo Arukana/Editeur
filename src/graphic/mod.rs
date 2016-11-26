@@ -164,6 +164,11 @@ impl Graphic {
             .and_then(|&(_, ref sprite)| Some(sprite))
     }
 
+    /// The accessor method `get_sprite` returns a reference on sprite.
+    pub fn get_current_sprite(&self) -> Option<&(PathBuf, Sprite)> {
+        self.sprite.get_ref().get(self.get_position())
+    }
+
     /// The function `insert_texel` insert a texel.
     fn insert_texel(&mut self,
                     (position, part, emotion): (Posture, Part, Emotion),
@@ -261,7 +266,7 @@ impl Graphic {
             SPEC_MAX_XY * 2
         ).collect::<Vec<&&str>>();
 
-        if let Some(why) = pairs.chunks(2).filter_map(|pair: &[&&str]|
+        pairs.chunks(2).filter_map(|pair: &[&&str]|
             match (
                 Part::new(pair[0]),
                 Emotion::new(pair[1])
@@ -270,19 +275,27 @@ impl Graphic {
                 (_, Err(why)) => Err(GraphicError::Emotion(why)),
                 (Ok(part), Ok(emotion)) => {
                     match self.get_texel(posture, &(part, emotion)) {
-                        Some(texel) => Ok(draw.push((emotion, *texel))),
                         None => Err(GraphicError::FoundTexel(format!("{}:{}", pair[0], pair[1]))),
+                        Some(texel) => {
+                            let position: usize = draw.iter()
+                                .fold(0, |acc, &(ref current_emotion, ref current_texel)|
+                                      if (current_emotion, current_texel.get_part()).eq(&(&emotion, &part)) {
+                                          acc + 1
+                                      } else {
+                                          acc
+                                      });
+                            let mut texel: Texel = *texel;
+                            texel.set_position(position);
+                            Ok(draw.push((emotion, texel)))
+                        },
                     }
                 },
             }.err()
-        ).next() {
-            Err(why)
-        } else {
+        ).next().and_then(|why| Some(Err(why))).unwrap_or_else(||
             match Draw::new(posture, draw.as_slice()) {
                 Ok(draw) => Ok(sprite.insert(draw)),
                 Err(why) => Err(GraphicError::Draw(why)),
-            }
-        }
+            })
     }
 
     /// The function `from_file_sprite` insert a sprite from a file.
@@ -305,7 +318,6 @@ impl Graphic {
                     match Posture::new(words.pop_front().unwrap()) {
                         Err(why) => Err(GraphicError::Posture(why)),
                         Ok(posture) => {
-                            println!("{:?}", file);
                             self.sprite_with_draw(
                                 &mut sprite, &posture, &words
                             ).and_then(|()|
@@ -407,6 +419,21 @@ impl Graphic {
                        .and_then(|&mut (_, ref mut sprite)|
                                  sprite.set_current((&emotion, &texel))));
     }
+
+    pub fn get_current_postures(&self) -> Option<&Posture> {
+        self.sprite
+            .get_ref()
+            .get(self.get_position())
+            .and_then(|&(_, ref sprite)| sprite.get_posture())
+    }
+/*
+    pub fn clone_current_texels_dictionary(&self) -> Option<HashMap<(Part, Emotion), Texel>> {
+        self.get_current_postures()
+            .and_then(|posture|
+                      self.texel.get(posture)
+                      .and_then(|part_by_emotion|
+                                Some(part_by_emotion.clone())))
+    }*/
 }
 
 impl fmt::Display for Graphic {
@@ -445,6 +472,19 @@ impl fmt::Display for Graphic {
                                     .collect::<String>()))
                                 .unwrap_or_default())}))).unwrap_or_default())
     }
+/*
+    /*
+    let mut dictionary: HashMap<(Part, Emotion), Texel> =
+    self.clone_current_texels_dictionary().unwrap();*/
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let (path, draw): (&Path, &Draw) = self.get_current_sprite()
+            .and_then(|&(ref path, ref sprite)|
+                      sprite.get_current_draw()
+                      .and_then(|draw|
+                                Some((path.as_path(), draw)))).unwrap();
+//        dictionary.
+        write!(f, "{}", 0)
+    }*/
 }
 
 /// A trait for giving a type a useful default value.
