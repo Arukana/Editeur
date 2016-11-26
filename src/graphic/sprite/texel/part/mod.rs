@@ -6,6 +6,8 @@ use std::fmt;
 
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum Part {
+    ArmLeft,
+    ArmRight,
     Boobs,
     Clavicle,
     EarLeft,
@@ -36,6 +38,8 @@ pub enum Part {
 impl Part {
     pub fn new(part: &str) -> Result<Self> {
         match part {
+            "ArmLeft" => Ok(Part::ArmLeft),
+            "ArmRight" => Ok(Part::ArmRight),
             "Boobs" => Ok(Part::Boobs),
             "Clavicle" => Ok(Part::Clavicle),
             "EarLeft" => Ok(Part::EarLeft),
@@ -71,6 +75,8 @@ impl fmt::Display for Part {
         write!(f,
                "{}",
                match *self {
+                  Part::ArmLeft => "Ml",
+                  Part::ArmRight => "Mr",
                   Part::Boobs => "Oo",
                   Part::Clavicle => "Cl",
                   Part::EarLeft => "Al",

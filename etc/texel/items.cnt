@@ -1,4 +1,5 @@
+Hearts('', '', '', '', '', ''):None [Bust, Seiza, Lying]
 Lantern('', '', '', ''):Love [Bust]
 Lantern('', '', '', ''):Misunderstanding [Bust]
 Lantern('', '', '', ''):Happy [Bust]
-Hearts('', '', '', '', '', ''):None [Bust, Seiza, Lying]
+QuestionMarks('', '', '', ''):Misunderstanding [Bust]
