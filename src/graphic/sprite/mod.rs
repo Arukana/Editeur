@@ -6,7 +6,6 @@ pub use self::draw::SPEC_MAX_XY;
 use self::draw::Draw;
 pub use self::err::{SpriteError, Result};
 pub use self::texel::Texel;
-use std::fmt;
 use std::io;
 use std::usize;
 pub use super::emotion::{Emotion, EmotionError};
@@ -100,17 +99,6 @@ impl Sprite {
             .get_mut(current_position)
             .and_then(|ref mut draw| draw.sub_position(position))
             .or(self.sub_position(1))
-    }
-}
-
-impl fmt::Display for Sprite {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}",
-               self.sheet
-                   .get_ref()
-                   .get(self.get_position())
-                   .and_then(|sheet| Some(format!("{}", sheet)))
-                   .unwrap_or_default())
     }
 }
 

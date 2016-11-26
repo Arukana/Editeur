@@ -9,10 +9,11 @@ use self::part::Part;
 use std::borrow::BorrowMut;
 use std::ops::{Add, Sub};
 use std::fmt;
+use std::mem;
 
 #[derive(Copy)]
 pub struct Texel {
-    part: Part, 
+    part: Part,
     count: usize,
     position: usize,
     glyph: [char; SPEC_MAX_XY],
@@ -26,7 +27,7 @@ impl Texel {
                 Ok(part) => Ok(
                     Texel {
                         part: part,
-                        count: 1,
+                        count: 0,
                         position: 0,
                         glyph: [glyph; SPEC_MAX_XY],
                     }
@@ -47,7 +48,7 @@ impl Texel {
         *self.glyph.get(self.get_position()).unwrap()
     }
 
-    fn get_position(&self) -> usize {
+    pub fn get_position(&self) -> usize {
         self.position
     }
 
@@ -77,11 +78,11 @@ impl fmt::Display for Texel {
 
 impl fmt::Debug for Texel {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Texel {{ part: {:?}, count: {}, position: {}, glyph: {:?} }}",
+        write!(f, "Texel {{ part: {:?}, position: {}, count: {}, glyph: {:?} }}",
                self.part,
-               self.count,
                self.position,
-               &self.glyph[..8])
+               self.count,
+               &self.glyph[..4])
     }
 }
 
@@ -107,7 +108,7 @@ impl Clone for Texel {
 
         glyph.copy_from_slice(&self.glyph);
         Texel {
-            part: self.part, 
+            part: self.part,
             count: self.count,
             position: self.position,
             glyph: glyph,
@@ -115,10 +116,13 @@ impl Clone for Texel {
     }
 
     fn clone_from(&mut self, source: &Texel) {
-        let start: usize = self.count;
+        let mut source: Texel = *source;
+
+        mem::swap(self, &mut &mut source);
+        let start: usize = self.count + 1;
         let end: usize = SPEC_MAX_XY.sub(&start);
 
         self.glyph[start..].borrow_mut().copy_from_slice(&source.glyph[..end]);
-        self.count = end;
+        self.count = start;
     }
 }

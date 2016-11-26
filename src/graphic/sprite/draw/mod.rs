@@ -99,49 +99,9 @@ impl Draw {
     }
 }
 
-impl fmt::Display for Draw {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let position: (usize, usize) =
-            (self.get_position().checked_rem(SPEC_MAX_X).unwrap_or(0),
-             self.get_position() / SPEC_MAX_X);
-        write!(f,
-               "{}",
-               self.board
-                   .get_ref()
-                   .chunks(SPEC_MAX_X)
-                   .enumerate()
-                   .map(|(y, cells)| {
-                format!("{} {} {}\n\r",
-                        cells.iter()
-                            .enumerate()
-                            .map(|(x, &(_, texel))| {
-                                format_cell!(texel.get_glyph(),
-                                             position,
-                                             x,
-                                             y)
-                            })
-                            .collect::<String>(),
-                        cells.iter()
-                            .enumerate()
-                            .map(|(x, &(_, texel))| {
-                                format_cell!(texel.get_part(), position, x, y)
-                            })
-                            .collect::<String>(),
-                        cells.iter()
-                            .enumerate()
-                            .map(|(x, &(emotion, _))| {
-                                format_cell!(emotion, position, x, y)
-                            })
-                            .collect::<String>())
-            })
-                   .collect::<String>())
-    }
-}
-
 impl fmt::Debug for Draw {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "(Posture: {:?}, sprite: {:?})",
+        write!(f, "(Posture: {:?}, sprite: {:?})",
                self.posture,
                self.board
                    .get_ref()

@@ -3,6 +3,7 @@ mod macros;
 mod menu;
 mod err;
 
+use std::path::Path;
 use std::io::{self, Write};
 use std::fmt;
 
@@ -11,6 +12,7 @@ pub use super::graphic;
 
 use super::termion;
 
+use termion::clear;
 use termion::input::{self, TermRead};
 use termion::raw::{self, IntoRawMode};
 use termion::event::{Event, MouseEvent, Key};
@@ -21,6 +23,10 @@ use clipboard::ClipboardContext;
 use self::graphic::Graphic;
 
 pub use self::graphic::sprite::draw::SPEC_MAX_X;
+use graphic::sprite::draw::Draw;
+use graphic::sprite::Sprite;
+use graphic::sprite::texel::Texel;
+use graphic::emotion::Emotion;
 
 use self::menu::Menu;
 
@@ -54,6 +60,37 @@ impl Editeur {
             },
         }
     }
+
+    fn write_filename(&self, f: &mut fmt::Formatter, path: &Path) -> fmt::Result {
+        write!(f, "{:?}{}\n\r",
+               path.file_stem().unwrap_or_default(),
+               clear::AfterCursor)
+    }
+
+    fn write_draw_unicode(&self, f: &mut fmt::Formatter, draw: &Draw) -> fmt::Result {
+        use std::fmt::Write;
+        for line in draw.into_iter().as_slice().chunks(SPEC_MAX_X) {
+            for &(_, ref texel) in line {
+                f.write_char(texel.get_glyph());
+            }
+            f.write_str("\n\r");
+        }
+        Ok(())
+    }
+
+    fn write_sprite(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if let Some((path, draw)) = self.graphic.get_current_sprite()
+            .and_then(|&(ref path, ref sprite)|
+                      sprite.get_current_draw()
+                      .and_then(|draw|
+                                Some((path.as_path(), draw)))) {
+                self.write_filename(f, path).and(
+                    self.write_draw_unicode(f, &draw))
+            } else {
+                f.write_str("there is not a current draw")
+            }
+
+    }
 }
 
 impl Write for Editeur {
@@ -68,10 +105,11 @@ impl Write for Editeur {
 
 impl fmt::Display for Editeur {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}{}\n\r{}\n\r",
+        write!(f, "{}{}\n\r\n\r",
                termion::cursor::Goto(1, 1),
                self.menu,
-               self.graphic)
+        );
+        self.write_sprite(f)
     }
 }
 
