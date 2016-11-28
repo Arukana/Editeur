@@ -62,21 +62,28 @@ impl Editeur {
     }
 
     #[cfg(feature = "clipboard")]
-    fn kopimism_command(&self) -> Option<()> {
+    fn kopimism_command(&mut self) -> Option<()> {
         self.graphic
             .get_current_sprite()
-            .and_then(|&(ref path, ref sprite): &(PathBuf, Sprite)|
+            .and_then(|&(_, ref sprite): &(PathBuf, Sprite)|
                 Some(sprite.into_iter()
                      .map(|draw: &Draw|
                           format!("{}{}",
-                                  draw.get_posture(),
-                                  draw.into_iter()
-                                  .map(|&(ref emotion, ref texel): &(Emotion, Texel)|
-                                       format!("{}{}", texel.get_part(), emotion))
-                                  .collect::<Vec<String>>()
-                                  .concat()))
+                              draw.get_posture(),
+                              draw.into_iter()
+                              .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
+                                   texel.is_first()
+                                        .and_then(|part: &Part|
+                                            part.not_empty()
+                                                .and_then(|ref part: &Part|
+                                                    emotion.not_empty()
+                                                        .and_then(|ref emotion: &Emotion|
+                                                            Some(format!("{}{}", part,
+                                                                         emotion))))))
+                                                        .collect::<Vec<String>>()
+                                                        .concat()))
                      .collect::<Vec<String>>()
-                     .concat()))
+                     .join(" ")))
             .and_then(|command: String|
                       self.kopimism
                       .set_contents(command).ok())

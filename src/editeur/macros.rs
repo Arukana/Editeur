@@ -11,3 +11,19 @@ macro_rules! editeur_new {
         }
     });
 }
+
+#[macro_export]
+#[cfg(feature = "clipboard")]
+macro_rules! editeur_new {
+    ($graphic: expr, $output: expr) => ({
+        use clipboard::ClipboardContext;
+        use std::io;
+        Editeur {
+            graphic: $graphic,
+            output: $output,
+            input: io::stdin().events(),
+            kopimism: ClipboardContext::new().unwrap(),
+            menu: Menu::default(),
+        }
+    });
+}
