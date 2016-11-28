@@ -151,8 +151,7 @@ impl Graphic {
                  tuple: &(Part, Emotion)
     ) -> Option<&Texel> {
         self.texel.get(position).and_then(|sprite|
-            sprite.get(tuple).and_then(|texel| Some(texel))
-        )
+                      sprite.get(tuple).and_then(|texel| Some(texel)))
     }
 
     /// The accessor method `get_sprite` returns a reference on sprite.
@@ -214,14 +213,14 @@ impl Graphic {
                 (&[part, ref characters..], &[emotion, ref postures..]) => {
                     postures.iter()
                         .filter_map(|posture: &&str|
-                                    characters.iter()
-                                    .filter_map(|character: &&str|
-                                                character.chars()
-                                                .filter_map(|glyph|
-                                                          self.line_with_character(
-                                                              posture, part, emotion, glyph).err())
-                                                .next())
-                                    .next().and_then(|why| Some(Err(why))))
+                            characters.iter()
+                                 .filter_map(|character: &&str|
+                                     character.chars()
+                                         .filter_map(|glyph|
+                                              self.line_with_character(
+                                                  posture, part, emotion, glyph).err())
+                                         .next())
+                                 .next().and_then(|why| Some(Err(why))))
                         .next().unwrap_or_else(|| Ok(()))
                 },
                 _ => Err(GraphicError::SyntaxTexel(line.to_string())),

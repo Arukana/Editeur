@@ -7,7 +7,6 @@ use super::graphic::GraphicError;
 pub type Result<T> = ::std::result::Result<T, EditeurError>;
 
 /// The enum `EditeurError` defines the possible errors from constructor Editeur.
-
 #[derive(Debug)]
 pub enum EditeurError {
     /// Can't write on the output.
@@ -20,7 +19,6 @@ pub enum EditeurError {
 
 
 impl fmt::Display for EditeurError {
-
     /// The function `fmt` formats the value using the given formatter.
     fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
         Ok(())
@@ -28,7 +26,6 @@ impl fmt::Display for EditeurError {
 }
 
 impl Error for EditeurError {
-
     /// The function `description` returns a short description of the error.
     fn description(&self) -> &str {
         match *self {
