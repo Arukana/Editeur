@@ -38,6 +38,13 @@ impl Emotion {
     pub fn is_none(&self) -> bool {
         self.eq(&Emotion::None)
     }
+
+    pub fn not_empty(&self) -> Option<&Emotion> {
+        match *self {
+            Emotion::None => None,
+            ref other => Some(other),
+        }
+    }
 }
 
 impl fmt::Display for Emotion {

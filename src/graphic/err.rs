@@ -32,6 +32,8 @@ pub enum GraphicError {
     Emotion(EmotionError),
     /// The Texel interface has meet an error.
     Texel(TexelError),
+    /// Can't split the chunk of sprite.
+    SpriteSplitFirst(String),
     /// The Part interface has meet an error.
     Part(PartError),
     /// Can't found the $HOME environement variable.
@@ -69,6 +71,7 @@ impl Error for GraphicError {
             GraphicError::Part(_) => "The Part interface has meet an error.",
             GraphicError::Home => "Can't found the $HOME environement variable.",
             GraphicError::Glyph => "Can't found the glyph of texel.",
+            GraphicError::SpriteSplitFirst(ref name) => name,
             GraphicError::FoundTexel(ref name) => name,
             GraphicError::SyntaxTexel(ref name) => name,
         }

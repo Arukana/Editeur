@@ -1,4 +1,4 @@
 Heart(""):None [Talk, NotTalk]
-None(""):None [Talk, NotTalk]
+None(""):None [Talk, NotTalk]
 Mouth(''):None [NotTalk]
 Mouth(''):None [Talk]

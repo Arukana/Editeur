@@ -55,6 +55,14 @@ impl Texel {
     pub fn set_position(&mut self, position: usize) {
         self.position = position;
     }
+
+    pub fn is_first(&self) -> Option<&Part> {
+        if self.count.eq(&0) {
+            Some(self.get_part())
+        } else {
+            None
+        }
+    }
 }
 
 impl ExactSizeIterator for Texel {

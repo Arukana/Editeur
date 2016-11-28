@@ -69,7 +69,7 @@ impl Draw {
 
     /// The accessor method `get_position` returns the position of
     /// the file sprite cursor.
-    fn get_position(&self) -> usize {
+    pub fn get_position(&self) -> usize {
         self.board.position() as usize
     }
 

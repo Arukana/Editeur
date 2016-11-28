@@ -37,7 +37,7 @@ use self::sprite::draw::{Draw, SPEC_MAX_XY};
 use self::sprite::texel::Texel;
 use self::sprite::texel::part::Part;
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::io;
@@ -236,30 +236,24 @@ impl Graphic {
             Err(why) => Err(GraphicError::OpenFile(why)),
             Ok(buffer) => {
                 let reader = io::BufReader::new(buffer).lines();
-                if let Some(why) = reader.filter_map(|line: io::Result<String>|
-                       match line {
-                           Err(why) => Err(GraphicError::ReadFile(why)),
-                           Ok(ref line) if line.is_empty() => Ok(()),
-                           Ok(line) => self.texel_with_line(&line),
-                       }.err()
-                ).next() {
-                    Err(why)
-                } else {
-                    Ok(())
-                }
+                reader.map(|line: io::Result<String>|
+                           match line {
+                               Err(why) => Err(GraphicError::ReadFile(why)),
+                               Ok(ref line) if line.is_empty() => Ok(()),
+                               Ok(line) => self.texel_with_line(&line),
+                           })
+                    .find(|f| f.is_err())
+                    .unwrap_or_else(|| Ok(()))
             }
         }
     }
 
     fn sprite_with_draw(
-        &self, sprite: &mut Sprite, posture: &Posture, words: &VecDeque<&str>,
+        &self, sprite: &mut Sprite, posture: &Posture, pairs: &&[&str],
     ) -> Result<()> {
         let mut draw: Vec<(Emotion, Texel)> = Vec::with_capacity(SPEC_MAX_XY);
-        let pairs = words.as_slices().0.iter().take(
-            SPEC_MAX_XY * 2
-        ).collect::<Vec<&&str>>();
 
-        pairs.chunks(2).filter_map(|pair: &[&&str]|
+        pairs.into_iter().as_slice().chunks(2).map(|pair: &[&str]|
             match (
                 Part::new(pair[0]),
                 Emotion::new(pair[1])
@@ -280,7 +274,8 @@ impl Graphic {
                                       (current_emotion,
                                        current_texel.get_part()
                                       ).eq(&(&emotion, &part)))
-                                .and_then(|&(_, ref texel)| Some(texel.get_position()));
+                                .and_then(|&(_, ref texel)|
+                                          Some(texel.get_position()));
                             if let &Some(position) = &position {
                                 let mut texel: Texel = *texel;
                                 texel.set_position(position+1);
@@ -291,8 +286,8 @@ impl Graphic {
                         },
                     }
                 },
-            }.err()
-        ).next().and_then(|why| Some(Err(why))).unwrap_or_else(||
+            }
+        ).find(|p| p.is_err()).unwrap_or_else(||
             match Draw::new(posture, draw.as_slice()) {
                 Ok(draw) => Ok(sprite.insert(draw)),
                 Err(why) => Err(GraphicError::Draw(why)),
@@ -303,8 +298,8 @@ impl Graphic {
     pub fn insert_from_spritefile<S: AsRef<OsStr> + AsRef<Path>>(
         &mut self, source: S
     ) -> Result<()> {
-        let mut sprite: Sprite = Sprite::default();
         let mut buffer: String = String::new();
+        let mut sprite: Sprite = Sprite::default();
 
         match fs::OpenOptions::new().read(true).open(&source) {
             Err(why) => Err(GraphicError::OpenFile(why)),
@@ -312,22 +307,29 @@ impl Graphic {
                 if let Some(why) = file.read_to_string(&mut buffer).err() {
                     Err(GraphicError::ReadFile(why))
                 } else {
-                    let mut words: VecDeque<&str> = buffer
-                        .split(|c| " \n:".contains(c))
+                    buffer.split(|c| " \n:".contains(c))
                         .filter(|x| x.is_empty().not())
-                        .collect::<VecDeque<&str>>();
-                    match Posture::new(words.pop_front().unwrap()) {
-                        Err(why) => Err(GraphicError::Posture(why)),
-                        Ok(posture) => {
-                            self.sprite_with_draw(
-                                &mut sprite, &posture, &words
-                            ).and_then(|()|
-                                Ok(self.insert_sprite((source.as_ref(), sprite)))
-                            )
-                        },
-                    }
+                        .collect::<Vec<&str>>()
+                        .as_slice()
+                        .chunks(SPEC_MAX_XY*2+1)
+                        .map(|sprite_and_draw|
+                             sprite_and_draw.split_first()
+                             .and_then(|(sprite_name, draw)| Some(
+                                 match Posture::new(sprite_name) {
+                                     Err(why) => Err(GraphicError::Posture(why)),
+                                     Ok(posture) => {
+                                         self.sprite_with_draw(
+                                             &mut sprite, &posture, &draw
+                                         )
+                                     },
+                                 }))
+                             .unwrap_or_else(|| Err(GraphicError::SpriteSplitFirst(
+                                 format!("{:?}", sprite_and_draw)))))
+                        .find(|anim| anim.is_err())
+                        .unwrap_or_else(|| Ok(
+                            self.insert_sprite((source.as_ref(), sprite))))
                 }
-            }
+            },
         }
     }
 
@@ -356,10 +358,9 @@ impl Graphic {
     /// The mutator method `sub_position` changes the position of
     /// the file sprite cursor.
     pub fn sub_position(&mut self, position: usize) {
-        match (self.get_position().checked_sub(position),
-               self.sprite.get_ref().len()) {
-            (None, len) => self.set_position(len),
-            (Some(pos), _) => self.set_position(pos),
+        if let (Some(pos), _) = (self.get_position().checked_sub(position),
+                                 self.sprite.get_ref().len()) {
+            self.set_position(pos);
         }
     }
 

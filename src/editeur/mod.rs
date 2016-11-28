@@ -3,24 +3,26 @@ mod macros;
 mod menu;
 mod err;
 
-
-#[cfg(feature = "clipboard")]
-use clipboard::ClipboardContext;
-use graphic::emotion::Emotion;
-
-use graphic::sprite::Sprite;
-use graphic::sprite::draw::Draw;
-use graphic::sprite::texel::Texel;
-
-pub use self::err::{EditeurError, Result};
-use self::graphic::Graphic;
-pub use self::graphic::sprite::draw::SPEC_MAX_X;
-
-use self::menu::Menu;
 use std::fmt::{self, Display};
 use std::io;
 use std::path::{Path, PathBuf};
+use std::ops::{BitAnd, Div, Rem};
+
+#[cfg(feature = "clipboard")]
+use clipboard::ClipboardContext;
+
+pub use self::err::{EditeurError, Result};
+
+use self::menu::Menu;
+
 pub use super::graphic;
+use self::graphic::Graphic;
+use graphic::position::Posture;
+use graphic::emotion::Emotion;
+use graphic::sprite::Sprite;
+use graphic::sprite::draw::{Draw, SPEC_MAX_X};
+use graphic::sprite::texel::Texel;
+use graphic::sprite::texel::part::Part;
 
 use super::termion;
 
@@ -59,6 +61,27 @@ impl Editeur {
         }
     }
 
+    #[cfg(feature = "clipboard")]
+    fn kopimism_command(&self) -> Option<()> {
+        self.graphic
+            .get_current_sprite()
+            .and_then(|&(ref path, ref sprite): &(PathBuf, Sprite)|
+                Some(sprite.into_iter()
+                     .map(|draw: &Draw|
+                          format!("{}{}",
+                                  draw.get_posture(),
+                                  draw.into_iter()
+                                  .map(|&(ref emotion, ref texel): &(Emotion, Texel)|
+                                       format!("{}{}", texel.get_part(), emotion))
+                                  .collect::<Vec<String>>()
+                                  .concat()))
+                     .collect::<Vec<String>>()
+                     .concat()))
+            .and_then(|command: String|
+                      self.kopimism
+                      .set_contents(command).ok())
+    }
+
     /// The printer method `write_filename` writes the file name on
     /// the current line.
     fn write_filename(&self, f: &mut fmt::Formatter,
@@ -68,15 +91,28 @@ impl Editeur {
                  .and("\n\r".fmt(f)))
     }
 
+    fn draw_cell(&self, f: &mut fmt::Formatter,
+                 part: &Part, current: bool) -> fmt::Result {
+        if current {
+            termion::style::Bold.fmt(f)
+                .and(part.fmt(f)
+                     .and(termion::style::Reset.fmt(f)))
+        } else {
+            part.fmt(f)
+        }
+    }
+
     /// The printer method `write_draw_line` writes the line by
     /// glyph, part and emotion.
     fn write_draw_line(&self, f: &mut fmt::Formatter,
-                       line: &[(Emotion, Texel)]) -> fmt::Result {
+                       line: &[(Emotion, Texel)],
+                       is_y: bool, current_x: usize) -> fmt::Result {
         line.iter().map(|&(_, texel): &(Emotion, Texel)|
                         texel.get_glyph())
             .collect::<String>().fmt(f).and(" ".fmt(f))
-            .and(line.iter().map(|&(_, texel): &(Emotion, Texel)|
-                                 texel.get_part().fmt(f))
+            .and(line.iter().enumerate()
+                 .map(|(x, &(_, texel)): (usize, &(Emotion, Texel))|
+                      self.draw_cell(f, texel.get_part(), is_y.bitand(&current_x.eq(&x))))
                  .find(|d| d.is_err())
                  .unwrap_or_else(|| " ".fmt(f))
                  .and(line.iter().map(|&(emotion, _): &(Emotion, Texel)|
@@ -87,17 +123,57 @@ impl Editeur {
 
     /// The printer method `write_draw` writes the draw
     /// line by line.
-    fn write_current_draw(&self, f: &mut fmt::Formatter,
-                          draw: &Draw) -> fmt::Result {
+    fn write_draw(&self, f: &mut fmt::Formatter,
+                  draw: &Draw) -> fmt::Result {
+        let current_position: usize = draw.get_position();
+        let (current_x, current_y): (usize, usize) = (
+            current_position.rem(SPEC_MAX_X),
+            current_position.div(SPEC_MAX_X),
+        );
+
         draw.get_posture().fmt(f)
             .and("\n\r".fmt(f))
             .and(draw.into_iter()
                  .as_slice()
                  .chunks(SPEC_MAX_X)
-                 .map(|line: &[(Emotion, Texel)]|
-                      self.write_draw_line(f, line))
+                 .enumerate()
+                 .map(|(y, line): (usize, &[(Emotion, Texel)])|
+                      self.write_draw_line(f, line, current_y.eq(&y), current_x))
                  .find(|f| f.is_err())
                  .unwrap_or_else(|| Ok(()))
+                 .and("\n\r".fmt(f)))
+    }
+
+    /// The printer method `write_draw_command` writes the all
+    /// the non-none (part, emotions) command of this draw.
+    fn write_draw_command(&self, f: &mut fmt::Formatter,
+                          draw: &Draw) -> fmt::Result {
+        draw.into_iter()
+            .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
+                texel.is_first()
+                .and_then(|part: &Part|
+                    part.not_empty()
+                    .and_then(|ref part: &Part|
+                        emotion.not_empty()
+                        .and_then(|ref emotion: &Emotion|
+                                  Some(part.fmt(f).and(emotion.fmt(f)))))))
+            .find(|d| d.is_err())
+            .unwrap_or_else(|| Ok(()))
+    }
+
+    /// The printer method `write_sprite_command` writes the all
+    /// the command's draws.
+    fn write_sprite_command(&self, f: &mut fmt::Formatter,
+                            sprite: &Sprite) -> fmt::Result {
+        sprite.into_iter()
+            .map(|draw: &Draw|
+                 draw.get_posture().fmt(f)
+                 .and(" { ".fmt(f))
+                 .and(self.write_draw_command(f, draw))
+                 .and("} ".fmt(f)))
+            .find(|s| s.is_err())
+            .unwrap_or_else(|| Ok(()))
+            .and(termion::clear::AfterCursor.fmt(f)
                  .and("\n\r".fmt(f)))
     }
 
@@ -106,11 +182,16 @@ impl Editeur {
         self.graphic
             .get_current_sprite()
             .and_then(|&(ref path, ref sprite): &(PathBuf, Sprite)|
-                      Some(self.write_filename(f, path.as_path())
-                           .and(sprite.into_iter()
-                                .map(|draw| self.write_current_draw(f, &draw))
-                                .find(|f| f.is_err())
-                                .unwrap_or_else(|| "\n\r".fmt(f)))))
+                Some(self.write_filename(f, path.as_path())
+                    .and(sprite.into_iter()
+                        .enumerate()
+                        .map(|(index, draw)|
+                                index.fmt(f)
+                                .and(" - ".fmt(f))
+                                .and(self.write_draw(f, &draw)))
+                        .find(|f| f.is_err())
+                        .unwrap_or_else(||
+                                self.write_sprite_command(f, sprite)))))
             .unwrap_or_else(|| "there is not a current draw".fmt(f))
     }
 }
@@ -154,49 +235,45 @@ impl Iterator for Editeur {
                 event => {
                     match event {
                         #[cfg(feature = "clipboard")]
-                    Event::Key(Key::Ctrl('c')) |
+                        Event::Key(Key::Ctrl('c')) |
                         Event::Key(Key::Char('c')) |
                         Event::Mouse(MouseEvent::Release(10...18, 1)) => {
-                            self.kopimism
-                                .set_contents(format!("{:?}", self.graphic))
-                                .ok()
-                        }
+                           self.kopimism_command()
+                        },
                         Event::Key(Key::Home) => {
                             Some(self.graphic.start_position(0))
-                        }
+                        },
                         Event::Key(Key::End) => {
                             Some(self.graphic.end_position(0))
-                        }
+                        },
                         Event::Key(Key::Char('H')) |
                         Event::Key(Key::PageUp) => {
                             Some(self.graphic.sub_position(1))
-                        }
+                        },
                         Event::Key(Key::Char('L')) |
                         Event::Key(Key::PageDown) => {
                             Some(self.graphic.add_position(1))
-                        }
+                        },
                         Event::Key(Key::Char('h')) |
                         Event::Key(Key::Left) => {
                             Some(self.graphic.sub_position_sprite_draw(1))
-                        }
+                        },
                         Event::Key(Key::Char('k')) |
                         Event::Key(Key::Up) => {
-                            Some(self.graphic
-                                .sub_position_sprite_draw(SPEC_MAX_X))
-                        }
+                            Some(self.graphic.sub_position_sprite_draw(SPEC_MAX_X))
+                        },
                         Event::Key(Key::Char('j')) |
                         Event::Key(Key::Down) => {
-                            Some(self.graphic
-                                .add_position_sprite_draw(SPEC_MAX_X))
-                        }
+                            Some(self.graphic.add_position_sprite_draw(SPEC_MAX_X))
+                        },
                         Event::Key(Key::Char('l')) |
                         Event::Key(Key::Right) => {
                             Some(self.graphic.add_position_sprite_draw(1))
-                        }
+                        },
                         Event::Key(Key::Char(nbr @ '0'...'9')) => {
                             Some(self.graphic
                                 .set_cell_draw(nbr as usize - '0' as usize))
-                        }
+                        },
                         _ => Some(()),
                     }
                 }

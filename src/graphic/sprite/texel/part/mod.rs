@@ -68,12 +68,18 @@ impl Part {
             name => Err(PartError::UnknownPart(name.to_string())),
         }
     }
+
+    pub fn not_empty(&self) -> Option<&Part> {
+        match *self {
+            Part::None => None,
+            ref other => Some(other)
+        }
+    }
 }
 
 impl fmt::Display for Part {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "{}",
+        write!(f, "{}",
                match *self {
                   Part::ArmLeft => "Ml",
                   Part::ArmRight => "Mr",
