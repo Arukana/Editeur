@@ -32,6 +32,7 @@
 #[cfg(feature = "clipboard")]
 extern crate clipboard;
 extern crate termion;
+extern crate time;
 
 mod editeur;
 pub mod graphic;

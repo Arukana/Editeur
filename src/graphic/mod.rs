@@ -18,6 +18,8 @@
     unused_qualifications
 )]
 
+extern crate time;
+
 #[macro_use]
 mod macros;
 pub mod sprite;
@@ -45,6 +47,8 @@ use std::io::prelude::*;
 use std::ops::Not;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+
+use ::time;
 
 /// The default capacity of Posture dictionary.
 pub const SPEC_CAPACITY_POSITION: usize = 25;
@@ -249,7 +253,7 @@ impl Graphic {
     }
 
     fn sprite_with_draw(
-        &self, sprite: &mut Sprite, posture: &Posture, pairs: &&[&str],
+        &self, sprite: &mut Sprite, duration: &str, posture: &Posture, pairs: &&[&str],
     ) -> Result<()> {
         let mut draw: Vec<(Emotion, Texel)> = Vec::with_capacity(SPEC_MAX_XY);
 
@@ -288,7 +292,7 @@ impl Graphic {
                 },
             }
         ).find(|p| p.is_err()).unwrap_or_else(||
-            match Draw::new(posture, draw.as_slice()) {
+            match Draw::new(posture, time::Duration(duration), draw.as_slice()) {
                 Ok(draw) => Ok(sprite.insert(draw)),
                 Err(why) => Err(GraphicError::Draw(why)),
             })
@@ -311,20 +315,21 @@ impl Graphic {
                         .filter(|x| x.is_empty().not())
                         .collect::<Vec<&str>>()
                         .as_slice()
-                        .chunks(SPEC_MAX_XY*2+1)
+                        .chunks(SPEC_MAX_XY*2+2)
                         .map(|sprite_and_draw|
                              sprite_and_draw.split_first()
-                             .and_then(|(sprite_name, draw)| Some(
-                                 match Posture::new(sprite_name) {
-                                     Err(why) => Err(GraphicError::Posture(why)),
-                                     Ok(posture) => {
-                                         self.sprite_with_draw(
-                                             &mut sprite, &posture, &draw
-                                         )
-                                     },
-                                 }))
-                             .unwrap_or_else(|| Err(GraphicError::SpriteSplitFirst(
-                                 format!("{:?}", sprite_and_draw)))))
+                             .and_then(|(sprite_name, duration_and_draw)|
+                                       duration_and_draw.split_first()
+                                       .and_then(|(duration, draw)| Some(
+                                            match Posture::new(sprite_name) {
+                                                Err(why) => Err(GraphicError::Posture(why)),
+                                                Ok(posture) => {
+                                                    self.sprite_with_draw(
+                                                        &mut sprite, duration, &posture, &draw
+                                                    )
+                                                },
+                                            })))
+                             .unwrap())
                         .find(|anim| anim.is_err())
                         .unwrap_or_else(|| Ok(
                             self.insert_sprite((source.as_ref(), sprite))))

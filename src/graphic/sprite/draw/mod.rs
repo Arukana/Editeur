@@ -14,14 +14,18 @@ pub use super::{Emotion, EmotionError};
 pub use super::{Posture, PostureError};
 pub use super::Texel;
 
+use ::time;
+
 /// Posture is like the Posture of the drawned persona.
 pub struct Draw {
     posture: Posture,
+    duration: time::Duration,
     board: io::Cursor<[(Emotion, Texel); SPEC_MAX_XY]>,
 }
 
 impl Draw {
     pub fn new(position: &Posture,
+               duration: time::Duration,
                buf: &[(Emotion, Texel)])
                -> Result<Self> {
         let len: usize = buf.len();
@@ -33,6 +37,7 @@ impl Draw {
                 line.copy_from_slice(buf);
                 Ok(Draw {
                     posture: *position,
+                    duration: duration,
                     board: io::Cursor::new(line),
                 })
             }
@@ -124,12 +129,14 @@ impl Clone for Draw {
     fn clone(&self) -> Draw {
         Draw {
             posture: self.posture,
+            duration: self.duration,
             board: io::Cursor::new(*self.board.get_ref()),
         }
     }
 
     fn clone_from(&mut self, source: &Self) {
-        self.posture = source.posture;
+        self.posture.clone_from(&source.posture);
+        self.duration.clone_from(source.duration);
         self.board.get_mut().copy_from_slice(source.board.get_ref());
     }
 }
