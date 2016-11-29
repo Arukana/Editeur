@@ -62,28 +62,34 @@ impl Editeur {
     }
 
     #[cfg(feature = "clipboard")]
+    fn kopimism_command_draw(&self, draw: &Draw) -> String {
+        draw.into_iter()
+            .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
+                        texel.is_first()
+                        .and_then(|part: &Part|
+                                  part.not_empty()
+                                  .and_then(|ref part: &Part|
+                                            emotion.not_empty()
+                                            .and_then(|ref emotion: &Emotion|
+                                                      Some(format!("{}{}",
+                                                                   part,
+                                                                   emotion))))))
+            .collect::<Vec<String>>()
+            .concat()
+    }
+
+    #[cfg(feature = "clipboard")]
     fn kopimism_command(&mut self) -> Option<()> {
         self.graphic
             .get_current_sprite()
             .and_then(|&(_, ref sprite): &(PathBuf, Sprite)|
-                Some(sprite.into_iter()
-                     .map(|draw: &Draw|
-                          format!("{}{}",
-                              draw.get_posture(),
-                              draw.into_iter()
-                              .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
-                                   texel.is_first()
-                                        .and_then(|part: &Part|
-                                            part.not_empty()
-                                                .and_then(|ref part: &Part|
-                                                    emotion.not_empty()
-                                                        .and_then(|ref emotion: &Emotion|
-                                                            Some(format!("{}{}", part,
-                                                                         emotion))))))
-                                                        .collect::<Vec<String>>()
-                                                        .concat()))
-                     .collect::<Vec<String>>()
-                     .join(" ")))
+                      Some(sprite.into_iter()
+                           .map(|draw: &Draw|
+                                format!("{}{}",
+                                        draw.get_posture(),
+                                        self.kopimism_command_draw(draw)))
+                           .collect::<Vec<String>>()
+                           .join(" ")))
             .and_then(|command: String|
                       self.kopimism
                       .set_contents(command).ok())
@@ -218,7 +224,7 @@ impl Display for Editeur {
         write!(f, "{}{}\n\r",
                termion::cursor::Goto(1, 1),
                self.menu)
-        .and(self.write_sprite(f))
+            .and(self.write_sprite(f))
     }
 }
 
@@ -260,6 +266,14 @@ impl Iterator for Editeur {
                         Event::Key(Key::Char('L')) |
                         Event::Key(Key::PageDown) => {
                             Some(self.graphic.add_position(1))
+                        },
+                        Event::Key(Key::Char('{')) |
+                        Event::Key(Key::Char('[')) => {
+                            Some(self.graphic.sub_position_sprite(1))
+                        },
+                        Event::Key(Key::Char('}')) |
+                        Event::Key(Key::Char(']')) => {
+                            Some(self.graphic.add_position_sprite(1))
                         },
                         Event::Key(Key::Char('h')) |
                         Event::Key(Key::Left) => {

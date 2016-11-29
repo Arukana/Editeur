@@ -71,11 +71,12 @@ impl Sprite {
         }
     }
 
-    /// The mutator method `sub_position_draw` decrements the position of
+    /// The mutator method `sub_position` decrements the position of
     /// the draw sheet cursor.
     pub fn sub_position(&mut self, position: usize) -> Option<()> {
         self.get_position()
             .checked_sub(position)
+            .or_else(|| self.sheet.get_ref().len().checked_sub(1))
             .and_then(|pos| Some(self.set_position(pos)))
     }
 
@@ -86,8 +87,9 @@ impl Sprite {
         self.sheet
             .get_mut()
             .get_mut(current_position)
-            .and_then(|ref mut draw| draw.add_position(position))
-            .or(self.add_position(1))
+            .and_then(|ref mut draw|
+                      draw.add_position(position))
+            .or_else(|| self.add_position(1))
     }
 
     /// The mutator method `sub_position_draw` decrements the position of
@@ -98,7 +100,7 @@ impl Sprite {
             .get_mut()
             .get_mut(current_position)
             .and_then(|ref mut draw| draw.sub_position(position))
-            .or(self.sub_position(1))
+            .or_else(|| self.sub_position(1))
     }
 }
 

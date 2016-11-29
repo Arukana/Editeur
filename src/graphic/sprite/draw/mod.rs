@@ -75,7 +75,7 @@ impl Draw {
 
     /// The mutator method `set_position` changes the position of
     /// the file sprite cursor.
-    fn set_position(&mut self, position: usize) {
+    pub fn set_position(&mut self, position: usize) {
         self.board.set_position(position as u64);
     }
 

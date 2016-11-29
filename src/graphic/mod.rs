@@ -375,6 +375,22 @@ impl Graphic {
         self.sub_position(position);
     }
 
+    pub fn add_position_sprite(&mut self, position: usize) {
+        let current_position: usize = self.get_position();
+        self.sprite.get_mut()
+            .get_mut(current_position)
+            .and_then(|&mut (_, ref mut sprite)|
+                      sprite.add_position(position));
+    }
+
+    pub fn sub_position_sprite(&mut self, position: usize) {
+        let current_position: usize = self.get_position();
+        self.sprite.get_mut()
+            .get_mut(current_position)
+            .and_then(|&mut (_, ref mut sprite)|
+                      sprite.sub_position(position));
+    }
+
     /// The mutator method `add_position_sprite_draw` changes the position of
     /// the cell board cursor.
     pub fn add_position_sprite_draw(&mut self, position: usize) {
@@ -417,9 +433,9 @@ impl Graphic {
             .and_then(|(&(_, ref emotion), texel)|
                       Some((*emotion, *texel)))
             .and_then(|(emotion, texel)|
-                       self.sprite.get_mut().get_mut(current_position)
-                       .and_then(|&mut (_, ref mut sprite)|
-                                 sprite.set_current((&emotion, &texel))));
+                      self.sprite.get_mut().get_mut(current_position)
+                      .and_then(|&mut (_, ref mut sprite)|
+                                sprite.set_current((&emotion, &texel))));
     }
 
 
