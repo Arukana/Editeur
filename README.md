@@ -3,5 +3,5 @@
 How to build
 ```shell
 git clone https://github.com/Arukana/Editor.git
-cargo build --features clippy clipboard
+cargo build --features clipboard
 ```

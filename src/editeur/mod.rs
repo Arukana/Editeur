@@ -67,7 +67,7 @@ impl Editeur {
                         .and_then(|part: &Part|
                                             emotion.not_empty()
                                             .and_then(|ref emotion: &Emotion|
-                                                      Some(format!("{}{}",
+                                                      Some(format!("{:?}:{:?}",
                                                                    part,
                                                                    emotion)))))
             .collect::<Vec<String>>()
