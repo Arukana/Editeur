@@ -10,7 +10,7 @@
 #![feature(slice_patterns)]
 #![feature(advanced_slice_patterns)]
 
-#![crate_type="lib"]
+#![crate_type="bin"]
 #![cfg_attr(feature = "nightly", feature(plugin))]
 
 #![feature(plugin)]
@@ -32,10 +32,9 @@
 #[cfg(feature = "clipboard")]
 extern crate clipboard;
 extern crate termion;
-extern crate time;
+extern crate graphic;
 
 mod editeur;
-pub mod graphic;
 
 use std::io::Write;
 

@@ -15,9 +15,7 @@ pub use self::err::{EditeurError, Result};
 
 use self::menu::Menu;
 
-pub use super::graphic;
-use self::graphic::Graphic;
-use graphic::position::Posture;
+use graphic::Graphic;
 use graphic::emotion::Emotion;
 use graphic::sprite::Sprite;
 use graphic::sprite::draw::{Draw, SPEC_MAX_X};
@@ -67,13 +65,11 @@ impl Editeur {
             .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
                         texel.is_first()
                         .and_then(|part: &Part|
-                                  part.not_empty()
-                                  .and_then(|ref part: &Part|
                                             emotion.not_empty()
                                             .and_then(|ref emotion: &Emotion|
                                                       Some(format!("{}{}",
                                                                    part,
-                                                                   emotion))))))
+                                                                   emotion)))))
             .collect::<Vec<String>>()
             .concat()
     }
@@ -134,6 +130,20 @@ impl Editeur {
                       .unwrap_or_else(|| "\n\r".fmt(f))))
     }
 
+    fn write_draw_emotion_list(&self, f: &mut fmt::Formatter,
+                               draw: &Draw) -> fmt::Result {
+        draw.get_current_part()
+            .and_then(|part: &Part|
+                      self.graphic.get_emotion_list(draw.get_posture(), part)
+                      .and_then(|emotions| Some(
+                          emotions.iter()
+                              .map(|emotion|
+                                          emotion.fmt(f))
+                              .find(|e| e.is_err())
+                      )).unwrap_or_else(|| Some(Ok(())))
+            ).unwrap_or_else(|| Ok(()))
+    }
+
     /// The printer method `write_draw` writes the draw
     /// line by line.
     fn write_draw(&self, f: &mut fmt::Formatter,
@@ -155,6 +165,8 @@ impl Editeur {
                  .find(|f| f.is_err())
                  .unwrap_or_else(|| Ok(()))
                  .and("\n\r".fmt(f)))
+            .and(self.write_draw_emotion_list(f, draw)
+                 .and("\n\r".fmt(f)))
     }
 
     /// The printer method `write_draw_command` writes the all
@@ -163,13 +175,13 @@ impl Editeur {
                           draw: &Draw) -> fmt::Result {
         draw.into_iter()
             .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
-                texel.is_first()
-                .and_then(|part: &Part|
-                    part.not_empty()
-                    .and_then(|ref part: &Part|
-                        emotion.not_empty()
-                        .and_then(|ref emotion: &Emotion|
-                                  Some(part.fmt(f).and(emotion.fmt(f)))))))
+                        texel.is_first()
+                        .and_then(|part: &Part|
+                                  emotion.not_empty()
+                                  .and_then(|emotion: &Emotion| Some(
+                                      format!(" {:?}:{:?}",
+                                              part,
+                                              emotion).fmt(f)))))
             .find(|d| d.is_err())
             .unwrap_or_else(|| Ok(()))
     }
@@ -180,10 +192,10 @@ impl Editeur {
                             sprite: &Sprite) -> fmt::Result {
         sprite.into_iter()
             .map(|draw: &Draw|
-                 draw.get_posture().fmt(f)
-                 .and(" { ".fmt(f))
+                 "--".fmt(f)
+                 .and(draw.get_posture().fmt(f))
                  .and(self.write_draw_command(f, draw))
-                 .and("} ".fmt(f)))
+                 .and(" ".fmt(f)))
             .find(|s| s.is_err())
             .unwrap_or_else(|| Ok(()))
             .and(termion::clear::AfterCursor.fmt(f)
@@ -199,9 +211,12 @@ impl Editeur {
                     .and(sprite.into_iter()
                         .enumerate()
                         .map(|(index, draw)|
-                                index.fmt(f)
-                                .and(" - ".fmt(f))
-                                .and(self.write_draw(f, &draw)))
+                             index.fmt(f)
+                             .and(" - ".fmt(f))
+                             .and(draw.get_duration().fmt(f))
+                             .and(": ".fmt(f))
+                             .and(self.write_draw(f, &draw))
+                        )
                         .find(|f| f.is_err())
                         .unwrap_or_else(||
                                 self.write_sprite_command(f, sprite)))))
@@ -293,7 +308,7 @@ impl Iterator for Editeur {
                         },
                         Event::Key(Key::Char(nbr @ '0'...'9')) => {
                             Some(self.graphic
-                                .set_cell_draw(nbr as usize - '0' as usize))
+                                .set_current_emotion(nbr as usize - '0' as usize))
                         },
                         _ => Some(()),
                     }

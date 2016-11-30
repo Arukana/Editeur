@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::io;
 
-use super::graphic::GraphicError;
+use ::graphic::GraphicError;
 
 pub type Result<T> = ::std::result::Result<T, EditeurError>;
 

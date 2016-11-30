@@ -1,4 +1,5 @@
 Heart(""):None [Talk, NotTalk]
+Heart(""):Shocked [Talk, NotTalk]
 None(""):None [Talk, NotTalk]
 Mouth(''):None [NotTalk]
 Mouth(''):None [Talk]

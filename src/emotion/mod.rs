@@ -49,7 +49,7 @@ impl Emotion {
 
 impl fmt::Display for Emotion {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self{
+        write!(f, "{}", match *self {
             Emotion::Angry => 'A',
             Emotion::Happy => 'H',
             Emotion::Love => 'L',

@@ -48,8 +48,6 @@ use std::ops::Not;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
-use ::time;
-
 /// The default capacity of Posture dictionary.
 pub const SPEC_CAPACITY_POSITION: usize = 25;
 /// The default capacity of Sprite dictionary by Posture dictionary.
@@ -149,6 +147,33 @@ impl Graphic {
         }
     }
 
+
+    /// The accessor method `get_emotion_list` returns a list of available emotions
+    /// for the Posture key and Part sub-key.
+    pub fn get_emotion_list(&self,
+                            posture_key: &Posture,
+                            part_key: &Part,
+    ) -> Option<Vec<&Emotion>> {
+        self.texel.get(posture_key)
+            .and_then(|part_by_emotion|
+                      Some(part_by_emotion.keys()
+                           .filter(|&&(part, _)| part.eq(part_key))
+                           .map(|&(_, ref emotion)|
+                                emotion).collect::<Vec<&Emotion>>()))
+    }
+
+    pub fn get_cell_list(&self,
+                            posture_key: &Posture,
+                            part_key: &Part,
+    ) -> Option<Vec<(&Emotion, &Texel)>> {
+        self.texel.get(posture_key)
+            .and_then(|part_by_emotion|
+                      Some(part_by_emotion.iter()
+                           .filter(|&(&(part, _), _)| part.eq(part_key))
+                           .map(|(&(_, ref emotion), texel)|
+                                (emotion, texel)).collect::<Vec<(&Emotion, &Texel)>>()))
+    }
+
     /// The accessor method `get_texel` returns a reference on texel.
     pub fn get_texel(&self,
                  position: &Posture,
@@ -222,7 +247,10 @@ impl Graphic {
                                      character.chars()
                                          .filter_map(|glyph|
                                               self.line_with_character(
-                                                  posture, part, emotion, glyph).err())
+                                                  posture,
+                                                  part,
+                                                  emotion,
+                                                  glyph).err())
                                          .next())
                                  .next().and_then(|why| Some(Err(why))))
                         .next().unwrap_or_else(|| Ok(()))
@@ -292,7 +320,7 @@ impl Graphic {
                 },
             }
         ).find(|p| p.is_err()).unwrap_or_else(||
-            match Draw::new(posture, time::Duration(duration), draw.as_slice()) {
+            match Draw::new(posture, duration.parse::<i64>().unwrap(), draw.as_slice()) {
                 Ok(draw) => Ok(sprite.insert(draw)),
                 Err(why) => Err(GraphicError::Draw(why)),
             })
@@ -416,31 +444,29 @@ impl Graphic {
                       sprite.sub_position_draw(position));
     }
 
-    pub fn get_cell(
-        &self, position: usize,
-    ) -> Option<(&(Part, Emotion), &Texel)> {
-        self.sprite.get_ref().get(self.get_position())
+    pub fn get_current_cell_number(&self, index: usize) -> Option<(Emotion, Texel)> {
+        self.get_current_sprite()
             .and_then(|&(_, ref sprite)|
                       sprite.get_posture()
                       .and_then(|posture|
-                                self.texel.get(posture)
-                                .and_then(|texels|
-                                          texels.iter()
-                                          .collect::<Vec<_>>()
-                                          .get(position)
-                                          .and_then(|&cell|
-                                                    Some(cell)))))
+                                sprite.current()
+                                .and_then(|(_, texel)|
+                                          self.get_cell_list(posture, texel.get_part())
+                                          .and_then(|emotions|
+                                                    emotions.get(index)
+                                                    .and_then(|&(emotion, texel)|
+                                                              Some((*emotion, *texel)))))))
     }
 
-    pub fn set_cell_draw(&mut self, position: usize) {
-        let current_position: usize = self.get_position();
-        self.get_cell(position)
-            .and_then(|(&(_, ref emotion), texel)|
-                      Some((*emotion, *texel)))
-            .and_then(|(emotion, texel)|
-                      self.sprite.get_mut().get_mut(current_position)
+    pub fn set_current_emotion(&mut self, index: usize) {
+        let position: usize = self.get_position();
+        let cell: Option<(Emotion, Texel)> = self.get_current_cell_number(index);
+
+        cell.and_then(|(ref emotion, ref texel)|
+                      self.sprite.get_mut()
+                      .get_mut(position)
                       .and_then(|&mut (_, ref mut sprite)|
-                                sprite.set_current((&emotion, &texel))));
+                                sprite.set_current((emotion, texel))));
     }
 
 

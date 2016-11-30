@@ -12,11 +12,10 @@ repository       = "https://github.com/arukana/Editeur.git"
 readme           = "README.md"
 keywords         = ["character", "expression", "editor"]
 license          = "GPL-3.0"
-build            = "build.rs"
 
 [lib]
-name             = "editeur"
-path             = "src/graphic/mod.rs"
+name             = "graphic"
+path             = "src/lib.rs"
 plugin           = true
 doctest          = false
 test             = false

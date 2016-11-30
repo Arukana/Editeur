@@ -56,8 +56,16 @@ impl Texel {
         self.position = position;
     }
 
+    pub fn get_slice(&self) -> &[char; SPEC_MAX_XY] {
+        &self.glyph
+    }
+
+    pub fn set_slice(&mut self, glyph: &[char; SPEC_MAX_XY]) {
+        self.glyph[0..].borrow_mut().copy_from_slice(&glyph[0..]);
+    }
+
     pub fn is_first(&self) -> Option<&Part> {
-        if self.count.eq(&0) {
+        if self.position.eq(&0) {
             Some(self.get_part())
         } else {
             None

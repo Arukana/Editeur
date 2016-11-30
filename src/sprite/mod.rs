@@ -35,7 +35,7 @@ impl Sprite {
         self.sheet
             .get_mut()
             .get_mut(position)
-            .and_then(|board| board.set_current(cell))
+            .and_then(|board| Some(board.set_current(cell)))
     }
 
     pub fn get_posture(&self) -> Option<&Posture> {

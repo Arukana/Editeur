@@ -13,6 +13,7 @@ pub const SPEC_MAX_PRE_XY: usize = SPEC_MAX_XY - 1;
 pub use super::{Emotion, EmotionError};
 pub use super::{Posture, PostureError};
 pub use super::Texel;
+pub use super::texel::part::Part;
 
 use ::time;
 
@@ -25,7 +26,7 @@ pub struct Draw {
 
 impl Draw {
     pub fn new(position: &Posture,
-               duration: time::Duration,
+               duration: i64,
                buf: &[(Emotion, Texel)])
                -> Result<Self> {
         let len: usize = buf.len();
@@ -37,7 +38,7 @@ impl Draw {
                 line.copy_from_slice(buf);
                 Ok(Draw {
                     posture: *position,
-                    duration: duration,
+                    duration: time::Duration::milliseconds(duration),
                     board: io::Cursor::new(line),
                 })
             }
@@ -54,18 +55,28 @@ impl Draw {
             .and_then(|&(ref emotion, ref texel)| Some((emotion, texel)))
     }
 
+    pub fn get_current_part(&self) -> Option<&Part> {
+        self.current()
+            .and_then(|(_, ref texel)|
+                      Some(texel.get_part()))
+    }
+
     pub fn set_current(&mut self,
-                       (emotion, texel): (&Emotion, &Texel))
-                       -> Option<()> {
-        let position: usize = self.get_position();
+                       (emotion, texel): (&Emotion, &Texel)) {
+        let part: &Part = texel.get_part();
+        let slice = texel.get_slice();
+
         self.board
             .get_mut()
-            .get_mut(position)
-            .and_then(|&mut (ref mut cell_emotion, ref mut cell_texel)| {
+            .iter_mut()
+            .filter(|&&mut (_, cell_texel)| cell_texel.get_part().eq(part))
+            .all(|&mut (ref mut cell_emotion,
+                        ref mut cell_texel):
+                  &mut (Emotion, Texel)| {
                 cell_emotion.clone_from(emotion);
-                cell_texel.clone_from(texel);
-                Some(())
-            })
+                cell_texel.set_slice(slice);
+                true
+            });
     }
 
     pub fn get_posture(&self) -> &Posture {
@@ -86,7 +97,7 @@ impl Draw {
 
     /// The mutator method `add_position` increments the position of
     /// the file sprite cursor.
-    pub fn add_position(&mut self, position: usize) -> Option<()> {
+   pub fn add_position(&mut self, position: usize) -> Option<()> {
         if let Some(pos @ 0...SPEC_MAX_PRE_XY) = self.get_position()
             .checked_add(position) {
             Some(self.set_position(pos))
@@ -101,6 +112,10 @@ impl Draw {
         self.get_position()
             .checked_sub(position)
             .and_then(|pos| Some(self.set_position(pos)))
+    }
+
+    pub fn get_duration(&self) -> &time::Duration {
+        &self.duration
     }
 }
 
@@ -136,8 +151,7 @@ impl Clone for Draw {
 
     fn clone_from(&mut self, source: &Self) {
         self.posture.clone_from(&source.posture);
-        self.duration.clone_from(source.duration);
+        self.duration.clone_from(&source.duration);
         self.board.get_mut().copy_from_slice(source.board.get_ref());
     }
 }
-
