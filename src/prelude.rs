@@ -1,4 +1,5 @@
 pub use super::{Graphic, GraphicError};
+pub use super::sheet::{Sheet, SheetError};
 pub use super::emotion::{Emotion, EmotionError};
 pub use super::position::{Posture, PostureError};
 pub use super::sprite::{Sprite, SpriteError};

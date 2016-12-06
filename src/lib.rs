@@ -22,6 +22,7 @@ extern crate time;
 
 #[macro_use]
 mod macros;
+pub mod sheet;
 pub mod sprite;
 pub mod emotion;
 pub mod position;
