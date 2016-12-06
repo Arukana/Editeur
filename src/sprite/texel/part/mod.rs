@@ -4,35 +4,36 @@ pub mod err;
 pub use self::err::{PartError, Result};
 use std::fmt;
 
+#[repr(u32)]
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum Part {
-    ArmLeft,
-    ArmRight,
-    Boobs,
-    Clavicle,
-    EarLeft,
-    EarRight,
-    EyeLeft,
-    EyeRight,
-    HairTop,
-    HairLeft,
-    HairRight,
-    HandLeft,
-    HandRight,
-    Mouth,
-    Tail,
+    None = 0,
 
-    Bell,
-    ExclamationMark,
-    ExclamationMarks,
-    Heart,
-    Hearts,
-    Lantern,
-    QuestionMark,
-    QuestionMarks,
-    WoolBall,
+    ArmLeft = 1,
+    ArmRight = 2,
+    Boobs = 3,
+    Clavicle = 4,
+    EarLeft = 5,
+    EarRight = 6,
+    EyeLeft = 7,
+    EyeRight = 8,
+    HairTop = 9,
+    HairLeft = 10,
+    HairRight = 11,
+    HandLeft = 12,
+    HandRight = 13,
+    Mouth = 14,
+    Tail = 15,
 
-    None,
+    Bell = 16,
+    ExclamationMark = 17,
+    ExclamationMarks = 18,
+    Heart = 19,
+    Hearts = 20,
+    Lantern = 21,
+    QuestionMark = 22,
+    QuestionMarks = 23,
+    WoolBall = 24,
 }
 
 impl Part {

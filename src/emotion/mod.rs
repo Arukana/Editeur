@@ -4,17 +4,18 @@ use std::fmt;
 
 pub use self::err::{EmotionError, Result};
 
+#[repr(u32)]
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum Emotion {
-    Angry,
-    Happy,
-    Love,
-    Malicious,
-    Misunderstanding,
-    Shocked,
-    Sleepy,
-    Speechless,
-    None,
+    None = 0,
+    Angry = 1,
+    Happy = 2,
+    Love = 3,
+    Malicious = 4,
+    Misunderstanding = 5,
+    Shocked = 6,
+    Sleepy = 7,
+    Speechless = 8,
 }
 
 impl Emotion {

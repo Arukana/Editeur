@@ -4,14 +4,15 @@ use std::fmt;
 
 pub use self::err::{PostureError, Result};
 
+#[repr(u32)]
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum Posture {
-    Talk,
-    NotTalk,
-    Bust,
-    Lying,
-    Seiza,
-    None,
+    None = 0,
+    Talk = 1,
+    NotTalk = 2,
+    Bust = 3,
+    Lying = 4,
+    Seiza = 5,
 }
 
 impl Posture {
