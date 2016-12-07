@@ -7,8 +7,8 @@ pub use self::err::{SheetError, Result};
 #[repr(u8)]
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum Sheet {
-    None = 0,
-    Bust = 1,
+    None = b'_',
+    Bust = b'b',
 }
 
 
