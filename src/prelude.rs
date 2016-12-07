@@ -1,3 +1,4 @@
+pub use super::SPEC_MAX_DRAW;
 pub use super::{Graphic, GraphicError};
 pub use super::sheet::{Sheet, SheetError};
 pub use super::emotion::{Emotion, EmotionError};

@@ -49,10 +49,15 @@ use std::ops::Not;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
+
+/// The limit of draws by sprite.
+pub const SPEC_MAX_DRAW: usize = 16;
+
 /// The default capacity of Posture dictionary.
 pub const SPEC_CAPACITY_POSITION: usize = 25;
 /// The default capacity of Sprite dictionary by Posture dictionary.
 pub const SPEC_CAPACITY_SPRITE: usize = 5;
+
 /// The sub-directory texel.
 pub const SPEC_SUBD_NCT: &'static str = "texel";
 /// The sub-directory sprite.
