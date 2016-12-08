@@ -112,3 +112,9 @@ impl fmt::Display for Part {
                })
     }
 }
+
+impl Default for Part {
+    fn default() -> Part {
+        Part::None
+    }
+}
