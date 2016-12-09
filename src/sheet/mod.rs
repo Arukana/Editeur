@@ -11,13 +11,19 @@ pub enum Sheet {
     Bust = b'b',
 }
 
-
 impl Sheet {
     pub fn new(content: &str) -> Result<Self> {
         match content {
-            "Bust" => Ok(Sheet::Bust),
-            "None" => Ok(Sheet::None),
+            "bust" => Ok(Sheet::Bust),
+            "none" => Ok(Sheet::None),
             name => Err(SheetError::UnknownSheet(name.to_string())),
+        }
+    }
+
+    pub fn get_name(&self) -> &'static str {
+        match *self {
+            Sheet::None => "None",
+            Sheet::Bust => "Bust",
         }
     }
 }

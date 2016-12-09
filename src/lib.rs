@@ -22,6 +22,7 @@ extern crate time;
 
 #[macro_use]
 mod macros;
+pub mod tuple;
 pub mod sheet;
 pub mod sprite;
 pub mod emotion;
@@ -33,6 +34,7 @@ pub mod prelude;
 use self::emotion::Emotion;
 use self::position::Posture;
 use self::sprite::Sprite;
+use self::sheet::Sheet;
 
 pub use self::err::{GraphicError, Result};
 
@@ -70,10 +72,15 @@ pub struct Graphic {
     /// Dictionary of texel.
     texel: HashMap<Posture, HashMap<(Part, Emotion), Texel>>,
     /// Dictionary of primitive's sprite.
-    sprite: io::Cursor<Vec<(PathBuf, Sprite)>>,
+    sprite: io::Cursor<Vec<(Sheet, Sprite)>>,
 }
 
 impl Graphic {
+    /// Work in progress.
+    pub fn get_sprite_with(&self, name: &Sheet) {
+        self.get_sprite(name)
+            .and_then(|sprite: &Sprite| Some(42));
+    }
 
     /// The constructor `new` returns a Graphic prepared with
     /// the texel and sprite root.
@@ -190,9 +197,9 @@ impl Graphic {
     }
 
     /// The accessor method `get_sprite` returns a reference on sprite.
-    pub fn get_sprite<S: AsRef<OsStr>>(&self, name: S) -> Option<&Sprite> {
+    pub fn get_sprite(&self, name: &Sheet) -> Option<&Sprite> {
         self.sprite.get_ref().iter()
-            .find(|&&(ref path, _)| path.file_stem().eq(&Some(name.as_ref())))
+            .find(|&&(ref sheet, _)| sheet.eq(name))
             .and_then(|&(_, ref sprite)| Some(sprite))
     }
 
@@ -210,8 +217,8 @@ impl Graphic {
     }
 
     /// The function `insert_sprite` insert a sprite.
-    fn insert_sprite(&mut self, (file, sprite): (&Path, Sprite)) {
-        self.sprite.get_mut().push((file.to_path_buf(), sprite))
+    fn insert_sprite(&mut self, sprite: (Sheet, Sprite)) {
+        self.sprite.get_mut().push(sprite)
     }
 
     fn line_with_character(
@@ -365,8 +372,15 @@ impl Graphic {
                                             })))
                              .unwrap())
                         .find(|anim| anim.is_err())
-                        .unwrap_or_else(|| Ok(
-                            self.insert_sprite((source.as_ref(), sprite))))
+                        .unwrap_or_else(|| {
+                            let path: &Path = source.as_ref();
+                            let name: &OsStr = path.file_stem().unwrap_or_default();
+                            let name = name.to_str().unwrap_or_default();
+                            match Sheet::new(name) {
+                                Err(why) => Err(GraphicError::Sheet(why)),
+                                Ok(sheet) => Ok(self.insert_sprite((sheet, sprite))),
+                            }
+                        })
                 }
             },
         }
@@ -477,7 +491,7 @@ impl Graphic {
 
 
     /// The accessor method `get_sprite` returns a reference on sprite.
-    pub fn get_current_sprite(&self) -> Option<&(PathBuf, Sprite)> {
+    pub fn get_current_sprite(&self) -> Option<&(Sheet, Sprite)> {
         self.sprite.get_ref().get(self.get_position())
     }
 }

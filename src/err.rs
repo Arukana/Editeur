@@ -2,6 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::io;
 
+use super::sheet::SheetError;
 use super::position::PostureError;
 use super::emotion::EmotionError;
 use super::sprite::draw::DrawError;
@@ -36,6 +37,8 @@ pub enum GraphicError {
     SpriteSplitFirst(String),
     /// The Part interface has meet an error.
     Part(PartError),
+    /// The Sheet interface has meet an error.
+    Sheet(SheetError),
     /// Can't found the $HOME environement variable.
     Home,
     /// Can't found the glyph of texel.
@@ -69,6 +72,7 @@ impl Error for GraphicError {
             GraphicError::Emotion(_) => "The Emotion interface has meet an error.",
             GraphicError::Texel(_) => "The Texel interface has meet an error.",
             GraphicError::Part(_) => "The Part interface has meet an error.",
+            GraphicError::Sheet(_) => "The Sheet interface has meet an error.",
             GraphicError::Home => "Can't found the $HOME environement variable.",
             GraphicError::Glyph => "Can't found the glyph of texel.",
             GraphicError::SpriteSplitFirst(ref name) => name,

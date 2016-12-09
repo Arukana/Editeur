@@ -5,7 +5,6 @@ mod err;
 
 use std::fmt::{self, Display};
 use std::io;
-use std::path::{Path, PathBuf};
 use std::ops::{BitAnd, Div, Rem};
 
 #[cfg(feature = "clipboard")]
@@ -16,6 +15,7 @@ pub use self::err::{EditeurError, Result};
 use self::menu::Menu;
 
 use graphic::Graphic;
+use graphic::sheet::Sheet;
 use graphic::emotion::Emotion;
 use graphic::sprite::Sprite;
 use graphic::sprite::draw::{Draw, SPEC_MAX_X};
@@ -94,8 +94,8 @@ impl Editeur {
     /// The printer method `write_filename` writes the file name on
     /// the current line.
     fn write_filename(&self, f: &mut fmt::Formatter,
-                      path: &Path) -> fmt::Result {
-        path.file_stem().unwrap_or_default().to_str().unwrap_or_default().fmt(f)
+                      path: &Sheet) -> fmt::Result {
+        path.get_name().fmt(f)
             .and(termion::clear::AfterCursor.fmt(f)
                  .and("\n\r".fmt(f)))
     }
@@ -206,8 +206,8 @@ impl Editeur {
     fn write_sprite(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.graphic
             .get_current_sprite()
-            .and_then(|&(ref path, ref sprite): &(PathBuf, Sprite)|
-                Some(self.write_filename(f, path.as_path())
+            .and_then(|&(ref path, ref sprite): &(Sheet, Sprite)|
+                Some(self.write_filename(f, path)
                     .and(sprite.into_iter()
                         .enumerate()
                         .map(|(index, draw)|

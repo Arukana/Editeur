@@ -1,5 +1,6 @@
 pub use super::SPEC_MAX_DRAW;
 pub use super::{Graphic, GraphicError};
+pub use super::tuple::Tuple;
 pub use super::sheet::{Sheet, SheetError};
 pub use super::emotion::{Emotion, EmotionError};
 pub use super::position::{Posture, PostureError};
