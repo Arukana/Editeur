@@ -38,6 +38,7 @@ use self::sheet::Sheet;
 
 pub use self::err::{GraphicError, Result};
 
+use self::tuple::Tuple;
 use self::sprite::draw::{Draw, SPEC_MAX_XY};
 use self::sprite::texel::Texel;
 use self::sprite::texel::part::Part;
@@ -70,16 +71,24 @@ pub const SPEC_ROOT: &'static str = ".neko";
 #[derive(Clone, Debug)]
 pub struct Graphic {
     /// Dictionary of texel.
-    texel: HashMap<Posture, HashMap<(Part, Emotion), Texel>>,
+    texel: HashMap<Posture, HashMap<(Part, Emotion), Vec<Texel>>>,
     /// Dictionary of primitive's sprite.
     sprite: io::Cursor<Vec<(Sheet, Sprite)>>,
 }
 
 impl Graphic {
-    /// Work in progress.
-    pub fn get_sprite_with(&self, name: &Sheet) {
+
+    /// The method `` returns the sprite modified by a list
+    /// of emotion.
+    pub fn get_sprite_with(&self,
+        name: &Sheet,
+        change: &[[Tuple; SPEC_MAX_XY]; SPEC_MAX_DRAW]
+    ) -> Option<Sprite> {
         self.get_sprite(name)
-            .and_then(|sprite: &Sprite| Some(42));
+            .and_then(|sprite: &Sprite| {
+                let mut sprite: Sprite = sprite.clone();
+                Some(sprite)
+            })
     }
 
     /// The constructor `new` returns a Graphic prepared with
@@ -178,20 +187,20 @@ impl Graphic {
     pub fn get_cell_list(&self,
                             posture_key: &Posture,
                             part_key: &Part,
-    ) -> Option<Vec<(&Emotion, &Texel)>> {
+    ) -> Option<Vec<(&Emotion, &Vec<Texel>)>> {
         self.texel.get(posture_key)
             .and_then(|part_by_emotion|
                       Some(part_by_emotion.iter()
                            .filter(|&(&(part, _), _)| part.eq(part_key))
                            .map(|(&(_, ref emotion), texel)|
-                                (emotion, texel)).collect::<Vec<(&Emotion, &Texel)>>()))
+                                (emotion, texel)).collect::<Vec<(&Emotion, &Vec<Texel>)>>()))
     }
 
     /// The accessor method `get_texel` returns a reference on texel.
     pub fn get_texel(&self,
                  position: &Posture,
                  tuple: &(Part, Emotion)
-    ) -> Option<&Texel> {
+    ) -> Option<&Vec<Texel>> {
         self.texel.get(position).and_then(|sprite|
                       sprite.get(tuple).and_then(|texel| Some(texel)))
     }
@@ -206,14 +215,13 @@ impl Graphic {
     /// The function `insert_texel` insert a texel.
     fn insert_texel(&mut self,
                     (position, part, emotion): (Posture, Part, Emotion),
-                    mut val: Texel,
-    ) -> Option<Texel> {
-        if let Some(ref texel) = self.get_texel(&position, &(part, emotion)) {
-            val.clone_from(&texel);
-        }
+                    val: Texel,
+    ) {
         self.texel.entry(position)
             .or_insert_with(|| HashMap::with_capacity(SPEC_CAPACITY_SPRITE))
-                .insert((part, emotion), val)
+            .entry((part, emotion))
+            .or_insert_with(|| Vec::with_capacity(SPEC_MAX_XY))
+            .push(val);
     }
 
     /// The function `insert_sprite` insert a sprite.
@@ -310,23 +318,19 @@ impl Graphic {
                         None => Err(GraphicError::FoundTexel(
                             format!("{}:{}", pair[0], pair[1]))
                         ),
-                        Some(texel) => {
-                            let position: Option<usize> =
+                        Some(texels) => {
+                            let index: usize =
                                 draw.iter()
-                                .rev()
-                                .find(|&&(ref current_emotion,
-                                          ref current_texel)|
-                                      (current_emotion,
-                                       current_texel.get_part()
-                                      ).eq(&(&emotion, &part)))
-                                .and_then(|&(_, ref texel)|
-                                          Some(texel.get_position()));
-                            if let &Some(position) = &position {
+                                    .filter(|&&(_, ref texel)|
+                                            texel.get_part()
+                                                 .eq(&part))
+                                    .count();
+                            if let Some(texel) = texels.get(index) {
                                 let mut texel: Texel = *texel;
-                                texel.set_position(position+1);
+                                texel.set_index(index);
                                 Ok(draw.push((emotion, texel)))
                             } else {
-                                Ok(draw.push((emotion, *texel)))
+                                unimplemented!()
                             }
                         },
                     }
@@ -464,7 +468,7 @@ impl Graphic {
                       sprite.sub_position_draw(position));
     }
 
-    pub fn get_current_cell_number(&self, index: usize) -> Option<(Emotion, Texel)> {
+    pub fn get_current_cell_number(&self, index: usize) -> Option<(Emotion, Vec<Texel>)> {
         self.get_current_sprite()
             .and_then(|&(_, ref sprite)|
                       sprite.get_posture()
@@ -475,12 +479,13 @@ impl Graphic {
                                           .and_then(|emotions|
                                                     emotions.get(index)
                                                     .and_then(|&(emotion, texel)|
-                                                              Some((*emotion, *texel)))))))
+                                                              Some((*emotion, texel.clone())))))))
     }
+    
 
     pub fn set_current_emotion(&mut self, index: usize) {
         let position: usize = self.get_position();
-        let cell: Option<(Emotion, Texel)> = self.get_current_cell_number(index);
+        let cell: Option<(Emotion, Vec<Texel>)> = self.get_current_cell_number(index);
 
         cell.and_then(|(ref emotion, ref texel)|
                       self.sprite.get_mut()

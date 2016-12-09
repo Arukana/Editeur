@@ -62,21 +62,24 @@ impl Draw {
     }
 
     pub fn set_current(&mut self,
-                       (emotion, texel): (&Emotion, &Texel)) {
-        let part: &Part = texel.get_part();
-        let slice = texel.get_slice();
+                       (emotion, texels): (&Emotion, &Vec<Texel>)) {
+        if let Some(texel) = texels.first() {
+            let part: &Part = texel.get_part();
 
-        self.board
-            .get_mut()
-            .iter_mut()
-            .filter(|&&mut (_, cell_texel)| cell_texel.get_part().eq(part))
-            .all(|&mut (ref mut cell_emotion,
-                        ref mut cell_texel):
-                  &mut (Emotion, Texel)| {
-                cell_emotion.clone_from(emotion);
-                cell_texel.set_slice(slice);
-                true
-            });
+            self.board
+                .get_mut()
+                .iter_mut()
+                .filter(|&&mut (_, cell_texel)| cell_texel.get_part().eq(part))
+                .zip(texels.iter())
+                .all(|(&mut (ref mut cell_emotion,
+                             ref mut cell_texel),
+                       texel):
+                      (&mut (Emotion, Texel), &Texel)| {
+                    cell_emotion.clone_from(emotion);
+                    cell_texel.set_glyph(texel.get_glyph());
+                    true
+                });
+        }
     }
 
     pub fn get_posture(&self) -> &Posture {

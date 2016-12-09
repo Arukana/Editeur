@@ -2,12 +2,15 @@ pub mod texel;
 pub mod draw;
 mod err;
 
-pub use self::draw::SPEC_MAX_XY;
-use self::draw::Draw;
-pub use self::err::{SpriteError, Result};
-pub use self::texel::Texel;
 use std::io;
 use std::usize;
+
+pub use self::draw::SPEC_MAX_XY;
+
+use self::draw::Draw;
+pub use self::texel::Texel;
+
+pub use self::err::{SpriteError, Result};
 pub use super::emotion::{Emotion, EmotionError};
 pub use super::position::{Posture, PostureError};
 
@@ -30,7 +33,7 @@ impl Sprite {
             .and_then(|draw| draw.current())
     }
 
-    pub fn set_current(&mut self, cell: (&Emotion, &Texel)) -> Option<()> {
+    pub fn set_current(&mut self, cell: (&Emotion, &Vec<Texel>)) -> Option<()> {
         let position: usize = self.get_position();
         self.sheet
             .get_mut()
