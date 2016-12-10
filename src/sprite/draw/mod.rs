@@ -120,6 +120,20 @@ impl Draw {
     pub fn get_duration(&self) -> &time::Duration {
         &self.duration
     }
+
+    pub fn set_cell_at(&mut self,
+        index: usize, texel: &Texel, emotion: &Emotion
+    ) {
+        self.board.get_mut()
+                  .iter_mut()
+                  .filter(|&&mut (_, ref cur_texel)| cur_texel.eq(&texel))
+                  .nth(index)
+                  .and_then(|&mut (ref mut cur_emotion, ref mut cur_texel)| {
+                        cur_emotion.clone_from(emotion);
+                        cur_texel.clone_from(texel);
+                        Some(())
+                  });
+    }
 }
 
 impl fmt::Debug for Draw {

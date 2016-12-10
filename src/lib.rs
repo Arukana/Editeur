@@ -31,17 +31,17 @@ mod err;
 
 pub mod prelude;
 
-use self::emotion::Emotion;
+pub use self::emotion::Emotion;
 use self::position::Posture;
 use self::sprite::Sprite;
 use self::sheet::Sheet;
 
 pub use self::err::{GraphicError, Result};
 
-use self::tuple::Tuple;
-use self::sprite::draw::{Draw, SPEC_MAX_XY};
-use self::sprite::texel::Texel;
-use self::sprite::texel::part::Part;
+pub use self::tuple::Tuple;
+pub use self::sprite::draw::{Draw, SPEC_MAX_XY};
+pub use self::sprite::texel::Texel;
+pub use self::sprite::texel::part::Part;
 
 use std::collections::HashMap;
 use std::env;
@@ -78,17 +78,40 @@ pub struct Graphic {
 
 impl Graphic {
 
-    /// The method `` returns the sprite modified by a list
+    pub fn get_posture(&self,
+                       name: &Sheet
+    ) -> Option<&Posture> {
+            self.sprite.get_ref().iter()
+                .find(|&&(ref sheet, _)| sheet.eq(name))
+                .and_then(|&(_, ref sprite)|
+                    sprite.get_posture())
+    }
+
+    /// The method `explicite_emotion` returns the sprite modified by a list
     /// of emotion.
-    pub fn get_sprite_with(&self,
+    pub fn implicite_emotion(&mut self,
+        name: &Sheet,
+        change: &[Emotion; SPEC_MAX_DRAW],
+    ) -> Option<&Sprite> {
+        self.sprite.get_mut().iter_mut()
+            .find(|&&mut (ref sheet, _)| name.eq(sheet))
+            .and_then(|&mut (_, ref mut sprite)| {
+                sprite.implicite_emotion(change);
+                Some(sprite)})
+            .and_then(|&mut ref sprite| Some(sprite))
+    }
+
+    /// The method `explicite_emotion` returns the sprite modified by a list
+    /// of emotion.
+    pub fn explicite_emotion(&mut self,
         name: &Sheet,
         change: &[[Tuple; SPEC_MAX_XY]; SPEC_MAX_DRAW]
-    ) -> Option<Sprite> {
-        self.get_sprite(name)
-            .and_then(|sprite: &Sprite| {
-                let mut sprite: Sprite = sprite.clone();
-                Some(sprite)
-            })
+    ) -> Option<&Sprite> {
+        self.sprite.get_mut().iter_mut()
+            .find(|&&mut (ref sheet, _)| name.eq(sheet))
+            .and_then(|&mut (_, ref mut sprite)|
+                Some(sprite.explicite_emotion(change)));
+        None
     }
 
     /// The constructor `new` returns a Graphic prepared with
@@ -193,7 +216,8 @@ impl Graphic {
                       Some(part_by_emotion.iter()
                            .filter(|&(&(part, _), _)| part.eq(part_key))
                            .map(|(&(_, ref emotion), texel)|
-                                (emotion, texel)).collect::<Vec<(&Emotion, &Vec<Texel>)>>()))
+                                (emotion, texel))
+                           .collect::<Vec<(&Emotion, &Vec<Texel>)>>()))
     }
 
     /// The accessor method `get_texel` returns a reference on texel.
@@ -304,43 +328,18 @@ impl Graphic {
     fn sprite_with_draw(
         &self, sprite: &mut Sprite, duration: &str, posture: &Posture, pairs: &&[&str],
     ) -> Result<()> {
-        let mut draw: Vec<(Emotion, Texel)> = Vec::with_capacity(SPEC_MAX_XY);
-
-        pairs.into_iter().as_slice().chunks(2).map(|pair: &[&str]|
-            match (
-                Part::new(pair[0]),
-                Emotion::new(pair[1])
-            ) {
-                (Err(why), _) => Err(GraphicError::Part(why)),
-                (_, Err(why)) => Err(GraphicError::Emotion(why)),
-                (Ok(part), Ok(emotion)) => {
-                    match self.get_texel(posture, &(part, emotion)) {
-                        None => Err(GraphicError::FoundTexel(
-                            format!("{}:{}", pair[0], pair[1]))
-                        ),
-                        Some(texels) => {
-                            let index: usize =
-                                draw.iter()
-                                    .filter(|&&(_, ref texel)|
-                                            texel.get_part()
-                                                 .eq(&part))
-                                    .count();
-                            if let Some(texel) = texels.get(index) {
-                                let mut texel: Texel = *texel;
-                                texel.set_index(index);
-                                Ok(draw.push((emotion, texel)))
-                            } else {
-                                unimplemented!()
-                            }
-                        },
-                    }
-                },
-            }
-        ).find(|p| p.is_err()).unwrap_or_else(||
-            match Draw::new(posture, duration.parse::<i64>().unwrap(), draw.as_slice()) {
-                Ok(draw) => Ok(sprite.insert(draw)),
-                Err(why) => Err(GraphicError::Draw(why)),
-            })
+        self.texel.get(posture)
+            .and_then(|texels|
+                      Some(sprite.extend(texels)));
+        sprite.insert_list(duration.parse::<i64>().unwrap(),
+                        posture,
+                        pairs.into_iter().as_slice().chunks(2)
+                             .map(|pair: &[&str]|
+                                   (Part::new(pair[0]).unwrap(),
+                                    Emotion::new(pair[1]).unwrap()))
+                             .collect::<Vec<(Part, Emotion)>>()
+                             .as_slice());
+        Ok(())
     }
 
     /// The function `from_file_sprite` insert a sprite from a file.

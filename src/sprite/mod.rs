@@ -2,6 +2,7 @@ pub mod texel;
 pub mod draw;
 mod err;
 
+use std::collections::HashMap;
 use std::io;
 use std::usize;
 
@@ -11,6 +12,9 @@ use self::draw::Draw;
 pub use self::texel::Texel;
 
 pub use self::err::{SpriteError, Result};
+pub use super::tuple::Tuple;
+pub use super::Part;
+pub use super::SPEC_MAX_DRAW;
 pub use super::emotion::{Emotion, EmotionError};
 pub use super::position::{Posture, PostureError};
 
@@ -18,12 +22,85 @@ const SPEC_CAPACITY_SHEET: usize = 5;
 
 #[derive(Clone, Debug)]
 pub struct Sprite {
+    texel: HashMap<(Part, Emotion), Vec<Texel>>,
     sheet: io::Cursor<Vec<Draw>>,
 }
 
 impl Sprite {
-    pub fn insert(&mut self, draw: Draw) {
-        self.sheet.get_mut().push(draw);
+
+    pub fn implicite_emotion(&mut self,
+        change: &[Emotion; SPEC_MAX_DRAW],
+    ) {
+    
+    }
+
+    pub fn explicite_emotion(&mut self,
+        change: &[[Tuple; SPEC_MAX_XY]; SPEC_MAX_DRAW]
+    ) {
+      let board: Vec<Vec<(Emotion, Vec<Texel>)>> =
+          change.iter()
+                .map(|tuples: &[Tuple; SPEC_MAX_XY]|
+                     tuples.iter()
+                           .filter_map(|tuple|
+                                self.texel.get(&(tuple.part, tuple.emotion))
+                                          .and_then(|texels|
+                                                   Some((tuple.emotion,
+                                                         texels.clone()))))
+                           .collect::<Vec<(Emotion, Vec<Texel>)>>())
+                .collect::<Vec<Vec<(Emotion, Vec<Texel>)>>>();
+
+        self.sheet.get_mut()
+            .iter_mut()
+            .zip(board.iter())
+            .all(|(draw, tuple): (&mut Draw, &Vec<(Emotion, Vec<Texel>)>)|
+                tuple.iter()
+                     .all(|&(emotion, ref texels): &(Emotion, Vec<Texel>)|
+                        texels.iter()
+                              .enumerate()
+                              .all(|(index, texel): (usize, &Texel)| {
+                                    draw.set_cell_at(index, texel, &emotion);
+                                    true
+                              })
+                     ));
+    }
+
+    /// The function `insert_list` push a new draw from a list of
+    /// tuple of emotion by part.
+    pub fn insert_list(&mut self,
+        duration: i64,
+        posture: &Posture,
+        source: &[(Part, Emotion)],
+    ) {
+        let mut draw: Vec<(Emotion, Texel)> = Vec::with_capacity(SPEC_MAX_XY);
+    
+        source.iter()
+              .all(|&(part, emotion): &(Part, Emotion)|
+                   self.texel.get(&(part, emotion))
+                       .and_then(|texels: &Vec<Texel>| {
+                            let index: usize =
+                                draw.iter()
+                                    .filter(|&&(_, ref texel)|
+                                            texel.get_part()
+                                                .eq(&part))
+                                    .count();
+                             Some(draw.push((emotion, *texels.get(index)
+                                                             .unwrap())))
+                    }).is_some());
+        self.sheet.get_mut()
+                  .push(Draw::new(posture, duration, draw.as_slice())
+                  .unwrap());
+    }
+
+    /// The function `extend` extends the local dictionary of texel.
+    pub fn extend(&mut self,
+                 texels: &HashMap<(Part, Emotion), Vec<Texel>>
+    ) {
+        texels.iter()
+               .all(|(&(part, emotion), value):
+                     (&(Part, Emotion), &Vec<Texel>)|
+                    self.texel.insert((part, emotion),
+                                      value.clone())
+                              .is_none());
     }
 
     pub fn current(&self) -> Option<(&Emotion, &Texel)> {
@@ -119,6 +196,7 @@ impl<'a> IntoIterator for &'a Sprite {
 impl Default for Sprite {
     fn default() -> Sprite {
         Sprite {
+            texel: HashMap::with_capacity(SPEC_MAX_XY),
             sheet: io::Cursor::new(Vec::with_capacity(SPEC_CAPACITY_SHEET)),
         }
     }
