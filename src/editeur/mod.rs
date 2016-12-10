@@ -95,20 +95,22 @@ impl Editeur {
     /// the current line.
     fn write_filename(&self, f: &mut fmt::Formatter,
                       path: &Sheet) -> fmt::Result {
-        path.get_name().fmt(f)
-            .and(termion::clear::AfterCursor.fmt(f)
-                 .and("\n\r".fmt(f)))
+        write!(f, "{}{}\n\r",
+               path.get_name(),
+               termion::clear::AfterCursor)
     }
 
     fn draw_cell(&self, f: &mut fmt::Formatter,
                  part: &Part, current: bool) -> fmt::Result {
-        if current {
-            termion::style::Bold.fmt(f)
-                .and(part.fmt(f)
-                     .and(termion::style::Reset.fmt(f)))
-        } else {
-            part.fmt(f)
-        }
+        write!(f, "{}",
+            if current {
+                format!("{}{}{}",
+                        termion::style::Bold,
+                        part,
+                        termion::style::Reset)
+            } else {
+                format!("{}", part)
+            })
     }
 
     /// The printer method `write_draw_line` writes the line by
