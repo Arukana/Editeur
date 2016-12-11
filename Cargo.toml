@@ -10,6 +10,7 @@ description      = "Character expression editor"
 documentation    = "https://arukana.github.io/Editeur/editeur"
 repository       = "https://github.com/arukana/Editeur.git"
 readme           = "README.md"
+build            = "build.rs"
 keywords         = ["character", "expression", "editor"]
 license          = "GPL-3.0"
 

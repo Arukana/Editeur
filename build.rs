@@ -2,7 +2,16 @@
 #![feature(advanced_slice_patterns)]
 #![allow(dead_code)]
 
-mod src;
+pub mod graphic {
+    /// The sub-directory texel.
+    pub const SPEC_SUBD_NCT: &'static str = "texels";
+    /// The sub-directory sprite.
+    pub const SPEC_SUBD_NCS: &'static str = "sprites";
+    /// The sub-directory font.
+    pub const SPEC_SUBD_NCF: &'static str = "fonts";
+    /// The first directory.
+    pub const SPEC_ROOT: &'static str = "NEKO_PATH";
+}
 
 const SPEC_ROOT: &'static str = "etc";
 
@@ -10,8 +19,6 @@ use std::env;
 use std::fs;
 use std::ffi::OsStr;
 use std::path::PathBuf;
-
-use src::prelude as graphic;
 
 fn copy<S: AsRef<OsStr>>(
     mut source: PathBuf,
@@ -39,9 +46,9 @@ fn copy<S: AsRef<OsStr>>(
 fn main() {
     env::current_dir().ok()
         .and_then(|mut source| {
-                  let destination: &'static str = env::var(
-                      graphic::SPEC_ROOT
-                  ).unwrap_or_else(source);
+                  let destination =
+                      PathBuf::from(env::var_os(graphic::SPEC_ROOT)
+                                        .unwrap_or_else(|| panic!("Have you set ${}?", graphic::SPEC_ROOT)));
                       source.push(SPEC_ROOT);
                       copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCT)
                           .and(copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCS))

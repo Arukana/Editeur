@@ -41,10 +41,10 @@ use std::io::Write;
 fn main() {
     let mut editeur: editeur::Editeur = editeur::Editeur::new().unwrap();
 
-    print!("{}", editeur);
-    while let Some(()) = editeur.flush().ok().and(
-        editeur.next()
-    ) {
+    loop {
         print!("{}", editeur);
+        if editeur.flush().ok().and(editeur.next()).is_none() {
+            break ;
+        }
     }
 }
