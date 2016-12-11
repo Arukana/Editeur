@@ -38,13 +38,13 @@ fn copy<S: AsRef<OsStr>>(
 
 fn main() {
     env::current_dir().ok()
-        .and_then(|mut source|
-                  env::home_dir()
-                  .and_then(|mut destination| {
+        .and_then(|mut source| {
+                  let destination: &'static str = env::var(
+                      graphic::SPEC_ROOT
+                  ).unwrap_or_else(source);
                       source.push(SPEC_ROOT);
-                      destination.push(graphic::SPEC_ROOT);
-                      copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCT).and(
-                          copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCS)
-                      )
-                  }));
+                      copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCT)
+                          .and(copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCS))
+                          .and(copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCF))
+                  });
 }

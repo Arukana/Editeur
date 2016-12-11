@@ -62,9 +62,11 @@ pub const SPEC_CAPACITY_POSITION: usize = 25;
 pub const SPEC_CAPACITY_SPRITE: usize = 5;
 
 /// The sub-directory texel.
-pub const SPEC_SUBD_NCT: &'static str = "texel";
+pub const SPEC_SUBD_NCT: &'static str = "texels";
 /// The sub-directory sprite.
-pub const SPEC_SUBD_NCS: &'static str = "sprite";
+pub const SPEC_SUBD_NCS: &'static str = "sprites";
+/// The sub-directory font.
+pub const SPEC_SUBD_NCF: &'static str = "fonts";
 /// The first directory.
 pub const SPEC_ROOT: &'static str = "NEKO_PATH";
 
