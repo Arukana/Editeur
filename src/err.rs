@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt;
 use std::io;
+use std::env;
 
 use super::sheet::SheetError;
 use super::position::PostureError;
@@ -39,8 +40,8 @@ pub enum GraphicError {
     Part(PartError),
     /// The Sheet interface has meet an error.
     Sheet(SheetError),
-    /// Can't found the $HOME environement variable.
-    Home,
+    /// Can't found the NEKO_PATH environement variable.
+    NekoPath,
     /// Can't found the glyph of texel.
     Glyph,
     /// Can't found the texel.
@@ -50,8 +51,8 @@ pub enum GraphicError {
 }
 
 impl fmt::Display for GraphicError {
-  /// The function `fmt` formats the value using
-  /// the given formatter.
+    /// The function `fmt` formats the value using
+    /// the given formatter.
     fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
        Ok(())
     }
@@ -73,7 +74,7 @@ impl Error for GraphicError {
             GraphicError::Texel(_) => "The Texel interface has meet an error.",
             GraphicError::Part(_) => "The Part interface has meet an error.",
             GraphicError::Sheet(_) => "The Sheet interface has meet an error.",
-            GraphicError::Home => "Can't found the $HOME environement variable.",
+            GraphicError::NekoPath => "Can't found the $NEKO_PATH environement variable.",
             GraphicError::Glyph => "Can't found the glyph of texel.",
             GraphicError::SpriteSplitFirst(ref name) => name,
             GraphicError::FoundTexel(ref name) => name,
@@ -97,5 +98,11 @@ impl Error for GraphicError {
             GraphicError::Part(ref why) => Some(why),
             _ => None,
         }
+    }
+}
+
+impl From<env::VarError> for GraphicError {
+    fn from(_: env::VarError) -> GraphicError {
+        GraphicError::NekoPath
     }
 }

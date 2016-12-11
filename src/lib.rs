@@ -66,7 +66,7 @@ pub const SPEC_SUBD_NCT: &'static str = "texel";
 /// The sub-directory sprite.
 pub const SPEC_SUBD_NCS: &'static str = "sprite";
 /// The first directory.
-pub const SPEC_ROOT: &'static str = ".neko";
+pub const SPEC_ROOT: &'static str = "NEKO_PATH";
 
 #[derive(Clone, Debug)]
 pub struct Graphic {
@@ -145,39 +145,35 @@ impl Graphic {
 
     /// The accessor method `get_nct` returns the texel sub-directory.
     pub fn get_nct(&self) -> Result<PathBuf> {
-        if let Some(mut path) = env::home_dir() {
-            path.push(SPEC_ROOT);
-            path.push(SPEC_SUBD_NCT);
-            if let Some(why) = fs::create_dir_all(&path).err() {
-                if why.kind() == io::ErrorKind::AlreadyExists {
+        let repertory: String = try!(env::var(SPEC_ROOT));
+        let path: PathBuf = PathBuf::from(repertory).join(SPEC_SUBD_NCT);
+
+        match fs::create_dir_all(&path) {
+            Ok(_) => Ok(path),
+            Err(why) => {
+                if why.kind().eq(&io::ErrorKind::AlreadyExists) {
                     Ok(path)
                 } else {
                     Err(GraphicError::MkDirTexel(why))
                 }
-            } else {
-                Ok(path)
-            }
-        } else {
-            Err(GraphicError::Home)
+            },
         }
     }
 
     /// The accessor method `get_ncs` returns the sprite sub-directory.
     pub fn get_ncs(&self) -> Result<PathBuf> {
-        if let Some(mut path) = env::home_dir() {
-            path.push(SPEC_ROOT);
-            path.push(SPEC_SUBD_NCS);
-            if let Some(why) = fs::create_dir_all(&path).err() {
-                if why.kind() == io::ErrorKind::AlreadyExists {
+        let repertory: String = try!(env::var(SPEC_ROOT));
+        let path: PathBuf = PathBuf::from(repertory).join(SPEC_SUBD_NCS);
+
+        match fs::create_dir_all(&path) {
+            Ok(_) => Ok(path),
+            Err(why) => {
+                if why.kind().eq(&io::ErrorKind::AlreadyExists) {
                     Ok(path)
                 } else {
-                    Err(GraphicError::MkDirSprite(why))
+                    Err(GraphicError::MkDirTexel(why))
                 }
-            } else {
-                Ok(path)
-            }
-        } else {
-            Err(GraphicError::Home)
+            },
         }
     }
 
