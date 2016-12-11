@@ -15,6 +15,7 @@ Cargo.lock
 *.rs#
 *.rs.swp
 *.swp
+*.swn
 *.swo
 
 # Temp files

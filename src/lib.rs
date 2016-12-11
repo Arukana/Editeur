@@ -109,9 +109,9 @@ impl Graphic {
     ) -> Option<&Sprite> {
         self.sprite.get_mut().iter_mut()
             .find(|&&mut (ref sheet, _)| name.eq(sheet))
-            .and_then(|&mut (_, ref mut sprite)|
-                Some(sprite.explicite_emotion(change)));
-        None
+            .and_then(|&mut (_, ref mut sprite)| {
+                sprite.explicite_emotion(change);
+                Some(&*sprite)})
     }
 
     /// The constructor `new` returns a Graphic prepared with
