@@ -1,3 +1,4 @@
+pub use super::SPEC_ROOT;
 pub use super::SPEC_MAX_DRAW;
 pub use super::{Graphic, GraphicError};
 pub use super::tuple::Tuple;
