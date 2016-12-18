@@ -1,4 +1,4 @@
-pub use super::{SPEC_ROOT, SPEC_MAX_DRAW, SPEC_SUBD_NCT,SPEC_SUBD_NCS, SPEC_SUBD_NCF};
+pub use super::{SPEC_ROOT, SPEC_ROOT_DEFAULT, SPEC_MAX_DRAW, SPEC_SUBD_NCT, SPEC_SUBD_NCS, SPEC_SUBD_NCF};
 pub use super::{Graphic, GraphicError};
 pub use super::tuple::Tuple;
 pub use super::sheet::{Sheet, SheetError};
