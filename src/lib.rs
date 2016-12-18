@@ -69,6 +69,7 @@ pub const SPEC_SUBD_NCS: &'static str = "sprites";
 pub const SPEC_SUBD_NCF: &'static str = "fonts";
 /// The first directory.
 pub const SPEC_ROOT: &'static str = "NEKO_PATH";
+pub const SPEC_ROOT_DEFAULT: &'static str = "etc";
 
 #[derive(Clone, Debug)]
 pub struct Graphic {
@@ -147,9 +148,15 @@ impl Graphic {
 
     /// The accessor method `get_nct` returns the texel sub-directory.
     pub fn get_nct(&self) -> Result<PathBuf> {
-        let repertory: String = try!(env::var(SPEC_ROOT));
-        let path: PathBuf = PathBuf::from(repertory).join(SPEC_SUBD_NCT);
-
+        let path: PathBuf =
+            env::var(SPEC_ROOT).ok()
+                .and_then(|repertory: String|
+                          Some(PathBuf::from(repertory)))
+                .unwrap_or_else(||
+                          PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                                            .join(SPEC_ROOT_DEFAULT))
+                .join(SPEC_SUBD_NCT);
+        println!("{:?}", path);
         match fs::create_dir_all(&path) {
             Ok(_) => Ok(path),
             Err(why) => {
@@ -164,9 +171,14 @@ impl Graphic {
 
     /// The accessor method `get_ncs` returns the sprite sub-directory.
     pub fn get_ncs(&self) -> Result<PathBuf> {
-        let repertory: String = try!(env::var(SPEC_ROOT));
-        let path: PathBuf = PathBuf::from(repertory).join(SPEC_SUBD_NCS);
-
+        let path: PathBuf =
+            env::var(SPEC_ROOT).ok()
+                .and_then(|repertory: String|
+                          Some(PathBuf::from(repertory)))
+                .unwrap_or_else(||
+                          PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                                            .join(SPEC_ROOT_DEFAULT))
+                .join(SPEC_SUBD_NCS);
         match fs::create_dir_all(&path) {
             Ok(_) => Ok(path),
             Err(why) => {
@@ -307,6 +319,7 @@ impl Graphic {
 
     /// The function `from_file_texel` insert a texel from a file.
     pub fn insert_from_texelfile<S: AsRef<Path>>(&mut self, source: S) -> Result<()> {
+        println!("{:?}", source.as_ref());
         match fs::OpenOptions::new().read(true).open(source.as_ref()) {
             Err(why) => Err(GraphicError::OpenFile(why)),
             Ok(buffer) => {

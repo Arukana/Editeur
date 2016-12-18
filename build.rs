@@ -44,13 +44,14 @@ fn copy<S: AsRef<OsStr>>(
 }
 
 fn main() {
-    env::current_dir().ok()
-        .and_then(|mut source| 
+    env::var("CARGO_MANIFEST_DIR").ok()
+        .and_then(|path: String| {
+            let mut source: PathBuf = PathBuf::from(path);
             env::var_os(graphic::SPEC_ROOT).and_then(|path| {
                   let destination = PathBuf::from(path);
                   source.push(SPEC_ROOT);
                   copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCT)
                       .and(copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCS))
                       .and(copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCF))
-                  }));
+                  })});
 }
