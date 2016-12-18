@@ -92,20 +92,6 @@ impl Graphic {
 
     /// The method `explicite_emotion` returns the sprite modified by a list
     /// of emotion.
-    pub fn implicite_emotion(&mut self,
-        name: &Sheet,
-        change: &[Emotion; SPEC_MAX_DRAW],
-    ) -> Option<&Sprite> {
-        self.sprite.get_mut().iter_mut()
-            .find(|&&mut (ref sheet, _)| name.eq(sheet))
-            .and_then(|&mut (_, ref mut sprite)| {
-                sprite.implicite_emotion(change);
-                Some(sprite)})
-            .and_then(|&mut ref sprite| Some(sprite))
-    }
-
-    /// The method `explicite_emotion` returns the sprite modified by a list
-    /// of emotion.
     pub fn explicite_emotion(&mut self,
         name: &Sheet,
         change: &[[Tuple; SPEC_MAX_XY]; SPEC_MAX_DRAW]

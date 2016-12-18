@@ -28,12 +28,6 @@ pub struct Sprite {
 
 impl Sprite {
 
-    pub fn implicite_emotion(&mut self,
-        change: &[Emotion; SPEC_MAX_DRAW],
-    ) {
-    
-    }
-
     pub fn explicite_emotion(&mut self,
         change: &[[Tuple; SPEC_MAX_XY]; SPEC_MAX_DRAW]
     ) {
