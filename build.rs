@@ -7,8 +7,6 @@ pub mod graphic {
     pub const SPEC_SUBD_NCT: &'static str = "texels";
     /// The sub-directory sprite.
     pub const SPEC_SUBD_NCS: &'static str = "sprites";
-    /// The sub-directory font.
-    pub const SPEC_SUBD_NCF: &'static str = "fonts";
     /// The first directory.
     pub const SPEC_ROOT: &'static str = "NEKO_PATH";
 }
@@ -52,6 +50,5 @@ fn main() {
                   source.push(SPEC_ROOT);
                   copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCT)
                       .and(copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCS))
-                      .and(copy(source.clone(), destination.clone(), graphic::SPEC_SUBD_NCF))
                   })});
 }
