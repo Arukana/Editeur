@@ -9,7 +9,6 @@ use std::fmt;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Texel {
     part: Part,
-    index: usize,
     glyph: char,
 }
 
@@ -21,7 +20,6 @@ impl Texel {
                 Ok(part) => Ok(
                     Texel {
                         part: part,
-                        index: 0,
                         glyph: glyph,
                     }
                 ),
@@ -41,24 +39,8 @@ impl Texel {
         self.glyph
     }
 
-    pub fn get_index(&self) -> usize {
-        self.index
-    }
-
-    pub fn set_index(&mut self, position: usize) {
-        self.index = position;
-    }
-
     pub fn set_glyph(&mut self, glyph: char) {
         self.glyph = glyph;
-    }
-
-    pub fn is_first(&self) -> Option<&Part> {
-        if self.index.eq(&0) {
-            Some(self.get_part())
-        } else {
-            None
-        }
     }
 }
 

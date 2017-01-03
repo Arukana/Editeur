@@ -178,8 +178,7 @@ impl Editeur {
         let mut sheet =
             draw.into_iter()
                 .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
-                     texel.is_first().and_then(|part: &Part|
-                         emotion.not_empty().and_then(|emotion: &Emotion| Some((*part, *emotion)))))
+                         emotion.not_empty().and_then(|emotion: &Emotion| Some((*texel.get_part(), *emotion))))
                 .collect::<Vec<(Part, Emotion)>>();
 
         sheet.dedup();
