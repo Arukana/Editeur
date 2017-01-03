@@ -42,6 +42,7 @@ pub use self::tuple::Tuple;
 pub use self::sprite::draw::{Draw, SPEC_MAX_XY};
 pub use self::sprite::texel::Texel;
 pub use self::sprite::texel::part::Part;
+pub use self::sprite::SPEC_MAX_DRAW;
 
 use std::collections::HashMap;
 use std::env;
@@ -51,10 +52,6 @@ use std::io::prelude::*;
 use std::ops::Not;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-
-
-/// The limit of draws by sprite.
-pub const SPEC_MAX_DRAW: usize = 16;
 
 /// The default capacity of Posture dictionary.
 pub const SPEC_CAPACITY_POSITION: usize = 25;

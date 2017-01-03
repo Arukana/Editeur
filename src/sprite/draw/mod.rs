@@ -136,6 +136,15 @@ impl Draw {
     }
 }
 
+impl<'a> IntoIterator for &'a Draw {
+    type Item = &'a (Emotion, Texel);
+    type IntoIter = ::std::slice::Iter<'a, (Emotion, Texel)>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.board.get_ref().into_iter()
+    }
+}
+
 impl fmt::Debug for Draw {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "(Posture: {:?}, sprite: {:?})",
@@ -145,15 +154,6 @@ impl fmt::Debug for Draw {
                    .iter()
                    .filter(|&&(ref emotion, _)| emotion.is_none())
                    .collect::<Vec<&(Emotion, Texel)>>())
-    }
-}
-
-impl<'a> IntoIterator for &'a Draw {
-    type Item = &'a (Emotion, Texel);
-    type IntoIter = ::std::slice::Iter<'a, (Emotion, Texel)>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.board.get_ref().into_iter()
     }
 }
 
@@ -170,5 +170,24 @@ impl Clone for Draw {
         self.posture.clone_from(&source.posture);
         self.duration.clone_from(&source.duration);
         self.board.get_mut().copy_from_slice(source.board.get_ref());
+    }
+}
+
+impl Default for Draw {
+    fn default() -> Draw {
+        unsafe {
+            let mut board: [(Emotion, Texel); SPEC_MAX_XY] =
+                mem::uninitialized();
+
+            assert!(board.iter_mut().all(|mut tuple| {
+                *tuple = (Emotion::default(), Texel::default());
+                true
+            }));
+            Draw {
+                posture: Posture::default(),
+                duration: time::Duration::milliseconds(0),
+                board: io::Cursor::new(board),
+            }
+        }
     }
 }

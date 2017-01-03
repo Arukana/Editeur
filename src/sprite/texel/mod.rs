@@ -6,7 +6,7 @@ pub use self::err::{TexelError, Result};
 use self::part::Part;
 use std::fmt;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Texel {
     part: Part,
     index: usize,

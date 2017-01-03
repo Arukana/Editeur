@@ -5,6 +5,7 @@ mod err;
 use std::collections::HashMap;
 use std::io;
 use std::usize;
+use std::mem;
 
 pub use self::draw::SPEC_MAX_XY;
 
@@ -14,16 +15,17 @@ pub use self::texel::Texel;
 pub use self::err::{SpriteError, Result};
 pub use super::tuple::Tuple;
 pub use super::Part;
-pub use super::SPEC_MAX_DRAW;
 pub use super::emotion::{Emotion, EmotionError};
 pub use super::position::{Posture, PostureError};
 
-const SPEC_CAPACITY_SHEET: usize = 5;
+/// The limit of draws by sprite.
+pub const SPEC_MAX_DRAW: usize = 16;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Sprite {
     texel: HashMap<(Part, Emotion), Vec<Texel>>,
-    sheet: io::Cursor<Vec<Draw>>,
+    sheet: io::Cursor<[Draw; SPEC_MAX_DRAW]>,
+    count: usize,
 }
 
 impl Sprite {
@@ -32,16 +34,14 @@ impl Sprite {
         change: &[[Tuple; SPEC_MAX_XY]; SPEC_MAX_DRAW]
     ) {
       let board: Vec<Vec<(Emotion, Vec<Texel>)>> =
-          change.iter()
-                .map(|tuples: &[Tuple; SPEC_MAX_XY]|
-                     tuples.iter()
-                           .filter_map(|tuple|
-                                self.texel.get(&(tuple.part, tuple.emotion))
-                                          .and_then(|texels|
-                                                   Some((tuple.emotion,
-                                                         texels.clone()))))
-                           .collect::<Vec<(Emotion, Vec<Texel>)>>())
-                .collect::<Vec<Vec<(Emotion, Vec<Texel>)>>>();
+          change.iter().map(|tuples: &[Tuple; SPEC_MAX_XY]| {
+                 tuples.iter().filter_map(|tuple| {
+                            self.texel.get(&(tuple.part, tuple.emotion))
+                                      .and_then(|texels| Some((tuple.emotion, texels.clone())))
+                 })
+                 .collect::<Vec<(Emotion, Vec<Texel>)>>()
+            })
+            .collect::<Vec<Vec<(Emotion, Vec<Texel>)>>>();
 
         self.sheet.get_mut()
             .iter_mut()
@@ -67,22 +67,21 @@ impl Sprite {
     ) {
         let mut draw: Vec<(Emotion, Texel)> = Vec::with_capacity(SPEC_MAX_XY);
     
-        source.iter()
-              .all(|&(part, emotion): &(Part, Emotion)|
-                   self.texel.get(&(part, emotion))
-                       .and_then(|texels: &Vec<Texel>| {
-                            let index: usize =
-                                draw.iter()
-                                    .filter(|&&(_, ref texel)|
-                                            texel.get_part()
-                                                .eq(&part))
-                                    .count();
-                             Some(draw.push((emotion, *texels.get(index)
-                                                             .unwrap())))
-                    }).is_some());
-        self.sheet.get_mut()
-                  .push(Draw::new(posture, duration, draw.as_slice())
-                  .unwrap());
+        source.iter().all(|&(part, emotion): &(Part, Emotion)| {
+           self.texel.get(&(part, emotion)).and_then(|texels: &Vec<Texel>| {
+                let index: usize = draw.iter().filter(|&&(_, ref texel)| {
+                    texel.get_part().eq(&part)
+                }).count();
+                Some(draw.push((emotion, *texels.get(index).unwrap())))
+            }).is_some()
+        });
+        if let Ok(draw) = Draw::new(posture, duration, draw.as_slice()) {
+            unsafe {
+                *self.sheet.get_mut()
+                     .get_unchecked_mut(self.count) = draw;
+                self.count += 1;
+            }
+        }
     }
 
     /// The function `extend` extends the local dictionary of texel.
@@ -178,20 +177,44 @@ impl Sprite {
     }
 }
 
+impl Clone for Sprite {
+       fn clone(&self) -> Sprite {
+            unsafe {
+                let mut sheet: [Draw; SPEC_MAX_DRAW] = mem::uninitialized();
+
+                sheet.clone_from_slice(self.sheet.get_ref());
+                Sprite {
+                    texel: self.texel.clone(),
+                    sheet: io::Cursor::new(sheet),
+                    count: self.count,
+                }
+            }
+       }
+}
+
 impl<'a> IntoIterator for &'a Sprite {
     type Item = &'a Draw;
     type IntoIter = ::std::slice::Iter<'a, Draw>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.sheet.get_ref().into_iter()
+        self.sheet.get_ref().split_at(self.count).0.into_iter()
     }
 }
 
 impl Default for Sprite {
     fn default() -> Sprite {
-        Sprite {
-            texel: HashMap::with_capacity(SPEC_MAX_XY),
-            sheet: io::Cursor::new(Vec::with_capacity(SPEC_CAPACITY_SHEET)),
+        unsafe {
+            let mut sheet: [Draw; SPEC_MAX_DRAW] = mem::uninitialized();
+
+            assert!(sheet.iter_mut().all(|mut draw| {
+                *draw = Draw::default();
+                true
+            }));
+            Sprite {
+                texel: HashMap::with_capacity(SPEC_MAX_XY),
+                sheet: io::Cursor::new(sheet),
+                count: 0,
+            }
         }
     }
 }
