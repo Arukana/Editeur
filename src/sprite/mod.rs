@@ -33,11 +33,11 @@ impl Sprite {
     pub fn explicite_emotion(&mut self,
         change: &[[Tuple; SPEC_MAX_XY]; SPEC_MAX_DRAW]
     ) {
-      let board: Vec<Vec<(Emotion, Vec<Texel>)>> =
-          change.iter().map(|tuples: &[Tuple; SPEC_MAX_XY]| {
+        let board: Vec<Vec<(Emotion, Vec<Texel>)>> =
+            change.iter().map(|tuples: &[Tuple; SPEC_MAX_XY]| {
                  tuples.iter().filter_map(|tuple| {
-                            self.texel.get(&(tuple.part, tuple.emotion))
-                                      .and_then(|texels| Some((tuple.emotion, texels.clone())))
+                      self.texel.get(&(tuple.part, tuple.emotion))
+                          .and_then(|texels| Some((tuple.emotion, texels.clone())))
                  })
                  .collect::<Vec<(Emotion, Vec<Texel>)>>()
             })

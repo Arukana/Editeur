@@ -139,7 +139,7 @@ impl Graphic {
                           PathBuf::from(env!("CARGO_MANIFEST_DIR"))
                                             .join(SPEC_ROOT_DEFAULT))
                 .join(SPEC_SUBD_NCT);
-        println!("{:?}", path);
+
         match fs::create_dir_all(&path) {
             Ok(_) => Ok(path),
             Err(why) => {

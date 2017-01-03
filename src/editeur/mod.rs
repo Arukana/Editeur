@@ -175,17 +175,18 @@ impl Editeur {
     /// the non-none (part, emotions) command of this draw.
     fn write_draw_command(&self, f: &mut fmt::Formatter,
                           draw: &Draw) -> fmt::Result {
-        draw.into_iter()
-            .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
-                        texel.is_first()
-                        .and_then(|part: &Part|
-                                  emotion.not_empty()
-                                  .and_then(|emotion: &Emotion| Some(
-                                      format!(" {:?}:{:?}",
-                                              part,
-                                              emotion).fmt(f)))))
-            .find(|d| d.is_err())
-            .unwrap_or_else(|| Ok(()))
+        let mut sheet =
+            draw.into_iter()
+                .filter_map(|&(ref emotion, ref texel): &(Emotion, Texel)|
+                     texel.is_first().and_then(|part: &Part|
+                         emotion.not_empty().and_then(|emotion: &Emotion| Some((*part, *emotion)))))
+                .collect::<Vec<(Part, Emotion)>>();
+
+        sheet.dedup();
+        sheet.iter()
+             .filter_map(|&(part, emotion)| Some(format!(" {:?}:{:?}", part, emotion).fmt(f)))
+             .find(|d| d.is_err())
+             .unwrap_or_else(|| Ok(()))
     }
 
     /// The printer method `write_sprite_command` writes the all
@@ -220,8 +221,7 @@ impl Editeur {
                              .and(self.write_draw(f, &draw))
                         )
                         .find(|f| f.is_err())
-                        .unwrap_or_else(||
-                                self.write_sprite_command(f, sprite)))))
+                        .unwrap_or_else(|| self.write_sprite_command(f, sprite)))))
             .unwrap_or_else(|| "there is not a current draw".fmt(f))
     }
 }
