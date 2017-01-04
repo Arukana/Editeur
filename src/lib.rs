@@ -19,6 +19,7 @@
 )]
 
 extern crate time;
+extern crate lalrpop_util;
 
 #[macro_use]
 mod macros;
@@ -27,6 +28,8 @@ pub mod sheet;
 pub mod sprite;
 pub mod emotion;
 pub mod position;
+pub mod util;
+pub mod input;
 mod err;
 
 pub mod prelude;

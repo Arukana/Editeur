@@ -2,7 +2,7 @@ use super::sprite::texel::part::Part;
 use super::emotion::Emotion;
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct Tuple {
     pub part: Part,
     pub emotion: Emotion,

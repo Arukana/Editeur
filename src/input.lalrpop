@@ -1,0 +1,53 @@
+use std::str::FromStr;
+
+use util;
+
+grammar; // This marks the file as a grammar for LALRPOP to generate code for.
+
+Vector<T>: Vec<T> = {
+    <v:(<T> ",")*> <e:T?> => util::init(e, v),
+};
+
+Set<T>: Vec<T> = {
+    <v:T> <e:T?> => util::init(e, v),
+};
+
+Instr<T>: Vec<T> = {
+    <v:(<T> r";")*> <e:T?> => util::init(e, v),
+};
+
+Capitale = r"[A-Z][a-z]+";
+
+Duration = r"[-]?[0-9]+";
+
+Part: util::Part = {
+     <name:Capitale> => util::Part::new(name).unwrap(),
+};
+
+Emotion: util::Emotion = {
+     <name:Capitale> => util::Emotion::new(name).unwrap(),
+};
+
+Posture: util::Posture = {
+     <name:Capitale> => util::Posture::new(name).unwrap(),
+};
+
+Postures = Vector<Posture>;
+
+Glyph = r#""[\x0000-\xffff]{2,}"|'[\x0000-\xffff]'"#;
+
+Texel: (util::Part, &'input str, util::Emotion, Vec<util::Posture>) = {
+     <part:Part> "(" <glyphs:Glyph> "):" <emotion:Emotion> "[" <postures:Postures> "]" => (part, &glyphs[1..glyphs.len()-1], emotion, postures),
+};
+
+pub Texels = Instr<Texel>;
+
+Tuple: util::Tuple = {
+	<part:Part> ":" <emotion:Emotion> => util::Tuple::from((part, emotion)),
+};
+
+Draw: (util::Posture, i64, Vec<util::Tuple>) = {
+	<posture:Posture> <duration:Duration> <t1:Tuple> <t2:Tuple> <t3:Tuple> <t4:Tuple> <t5:Tuple> <t6:Tuple> <t7:Tuple> <t8:Tuple> <t9:Tuple> <t10:Tuple> <t11:Tuple> <t12:Tuple> <t13:Tuple> <t14:Tuple> <t15:Tuple> <t16:Tuple> <t17:Tuple> <t18:Tuple> <t19:Tuple> <t20:Tuple> <t21:Tuple> <t22:Tuple> <t23:Tuple> <t24:Tuple> <t25:Tuple> <t26:Tuple> <t27:Tuple> <t28:Tuple> <t29:Tuple> <t30:Tuple> <t31:Tuple> <t32:Tuple> <t33:Tuple> <t34:Tuple> <t35:Tuple> <t36:Tuple> <t37:Tuple> <t38:Tuple> <t39:Tuple> <t40:Tuple> <t41:Tuple> <t42:Tuple> <t43:Tuple> <t44:Tuple> <t45:Tuple> <t46:Tuple> <t47:Tuple> <t48:Tuple> <t49:Tuple> <t50:Tuple> => (posture, i64::from_str(duration).unwrap(), vec![t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35, t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47, t48, t49, t50]),
+};
+
+pub Draws = Instr<Draw>;
