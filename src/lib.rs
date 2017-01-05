@@ -15,7 +15,6 @@
     trivial_numeric_casts,
     unused_import_braces,
     blacklisted_name,
-    unused_qualifications
 )]
 
 extern crate time;
