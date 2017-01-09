@@ -269,9 +269,11 @@ impl Iterator for Editeur {
                         Event::Mouse(MouseEvent::Release(10...18, 1)) => {
                            self.kopimism_command()
                         },
+                        Event::Key(Key::Char('g')) |
                         Event::Key(Key::Home) => {
                             Some(self.graphic.start_position(0))
                         },
+                        Event::Key(Key::Char('G')) |
                         Event::Key(Key::End) => {
                             Some(self.graphic.end_position(0))
                         },
@@ -308,8 +310,8 @@ impl Iterator for Editeur {
                             Some(self.graphic.add_position_sprite_draw(1))
                         },
                         Event::Key(Key::Char(nbr @ '0'...'9')) => {
-                            Some(self.graphic
-                                .set_current_emotion(nbr as usize - '0' as usize))
+                            Some(self.graphic.set_current_emotion(
+                                    nbr as usize - '0' as usize))
                         },
                         _ => Some(()),
                     }
