@@ -23,7 +23,7 @@ pub const SPEC_MAX_DRAW: usize = 16;
 
 #[derive(Debug)]
 pub struct Sprite {
-    texel: HashMap<(Part, Emotion), Vec<Texel>>,
+    texel: HashMap<Tuple, Vec<Texel>>,
     sheet: io::Cursor<[Draw; SPEC_MAX_DRAW]>,
     count: usize,
 }
@@ -36,7 +36,7 @@ impl Sprite {
         let board: Vec<Vec<(Emotion, Vec<Texel>)>> =
             change.iter().map(|tuples: &[Tuple; SPEC_MAX_XY]| {
                  tuples.iter().filter_map(|tuple| {
-                      self.texel.get(&(tuple.part, tuple.emotion))
+                      self.texel.get(&Tuple::from((tuple.part, tuple.emotion)))
                           .and_then(|texels| Some((tuple.emotion, texels.clone())))
                  })
                  .collect::<Vec<(Emotion, Vec<Texel>)>>()
@@ -63,16 +63,17 @@ impl Sprite {
     pub fn insert_list(&mut self,
         duration: i64,
         posture: &Posture,
-        source: &[(Part, Emotion)],
+        source: &[Tuple],
     ) {
         let mut draw: Vec<(Emotion, Texel)> = Vec::with_capacity(SPEC_MAX_XY);
     
-        source.iter().all(|&(part, emotion): &(Part, Emotion)| {
-           self.texel.get(&(part, emotion)).and_then(|texels: &Vec<Texel>| {
+        source.iter().all(|&tuple: &Tuple| {
+           self.texel.get(&tuple)
+                     .and_then(|texels: &Vec<Texel>| {
                 let index: usize = draw.iter().filter(|&&(_, ref texel)| {
-                    texel.get_part().eq(&part)
+                    texel.get_part().eq(&tuple.part)
                 }).count();
-                Some(draw.push((emotion, *texels.get(index).unwrap())))
+                Some(draw.push((tuple.emotion, *texels.get(index).unwrap())))
             }).is_some()
         });
         if let Ok(draw) = Draw::new(posture, duration, draw.as_slice()) {
@@ -86,12 +87,12 @@ impl Sprite {
 
     /// The function `extend` extends the local dictionary of texel.
     pub fn extend(&mut self,
-                 texels: &HashMap<(Part, Emotion), Vec<Texel>>
+                 texels: &HashMap<Tuple, Vec<Texel>>
     ) {
         texels.iter()
-               .all(|(&(part, emotion), value):
-                     (&(Part, Emotion), &Vec<Texel>)|
-                    self.texel.insert((part, emotion),
+               .all(|(&Tuple { part, emotion }, value):
+                     (&Tuple, &Vec<Texel>)|
+                    self.texel.insert(Tuple::from((part, emotion)),
                                       value.clone())
                               .is_none());
     }

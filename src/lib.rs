@@ -73,7 +73,7 @@ pub const SPEC_ROOT_DEFAULT: &'static str = "etc";
 #[derive(Clone, Debug)]
 pub struct Graphic {
     /// Dictionary of texel.
-    texel: HashMap<Posture, HashMap<(Part, Emotion), Vec<Texel>>>,
+    texel: HashMap<Posture, HashMap<Tuple, Vec<Texel>>>,
     /// Dictionary of primitive's sprite.
     sprite: io::Cursor<Vec<(Sheet, Sprite)>>,
 }
@@ -197,8 +197,8 @@ impl Graphic {
         self.texel.get(posture_key)
             .and_then(|part_by_emotion|
                       Some(part_by_emotion.keys()
-                           .filter(|&&(part, _)| part.eq(part_key))
-                           .map(|&(_, ref emotion)|
+                           .filter(|&&Tuple { part, .. }| part.eq(part_key))
+                           .map(|&Tuple { part: _, ref emotion }|
                                 emotion).collect::<Vec<&Emotion>>()))
     }
 
@@ -209,8 +209,8 @@ impl Graphic {
         self.texel.get(posture_key)
             .and_then(|part_by_emotion|
                       Some(part_by_emotion.iter()
-                           .filter(|&(&(part, _), _)| part.eq(part_key))
-                           .map(|(&(_, ref emotion), texel)|
+                           .filter(|&(&Tuple { part, emotion: _ }, _)| part.eq(part_key))
+                           .map(|(&Tuple { part: _, ref emotion }, texel)|
                                 (emotion, texel))
                            .collect::<Vec<(&Emotion, &Vec<Texel>)>>()))
     }
@@ -218,7 +218,7 @@ impl Graphic {
     /// The accessor method `get_texel` returns a reference on texel.
     pub fn get_texel(&self,
                  position: &Posture,
-                 tuple: &(Part, Emotion)
+                 tuple: &Tuple,
     ) -> Option<&Vec<Texel>> {
         self.texel.get(position).and_then(|sprite|
                       sprite.get(tuple).and_then(|texel| Some(texel)))
@@ -233,12 +233,12 @@ impl Graphic {
 
     /// The function `insert_texel` insert a texel.
     fn insert_texel(&mut self,
-                    (position, part, emotion): (Posture, Part, Emotion),
+                    (position, tuple): (Posture, Tuple),
                     val: Texel,
     ) {
         self.texel.entry(position)
             .or_insert_with(|| HashMap::with_capacity(SPEC_CAPACITY_SPRITE))
-            .entry((part, emotion))
+            .entry(tuple)
             .or_insert_with(|| Vec::with_capacity(SPEC_MAX_XY))
             .push(val);
     }
@@ -258,7 +258,7 @@ impl Graphic {
             (_, Err(why), _) => Err(GraphicError::Texel(why)),
             (_, _, Err(why)) => Err(GraphicError::Emotion(why)),
             (Ok(posture), Ok(texel), Ok(emotion)) => {
-                self.insert_texel((posture, *texel.get_part(), emotion), texel);
+                self.insert_texel((posture, Tuple::from((*texel.get_part(), emotion))), texel);
                 Ok(())
             },
         }
@@ -331,9 +331,9 @@ impl Graphic {
                         posture,
                         pairs.into_iter().as_slice().chunks(2)
                              .map(|pair: &[&str]|
-                                   (Part::new(pair[0]).unwrap(),
-                                    Emotion::new(pair[1]).unwrap()))
-                             .collect::<Vec<(Part, Emotion)>>()
+                                   Tuple::from((Part::new(pair[0]).unwrap(),
+                                    Emotion::new(pair[1]).unwrap())))
+                             .collect::<Vec<Tuple>>()
                              .as_slice());
         Ok(())
     }
