@@ -18,7 +18,6 @@
 )]
 
 extern crate time;
-extern crate lalrpop_util;
 
 #[macro_use]
 mod macros;
@@ -28,11 +27,12 @@ pub mod sprite;
 pub mod emotion;
 pub mod position;
 pub mod util;
-pub mod input;
 mod err;
+pub mod cursor;
 
 pub mod prelude;
 
+pub use self::cursor::Cursor;
 pub use self::emotion::Emotion;
 use self::position::Posture;
 use self::sprite::Sprite;

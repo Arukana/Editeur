@@ -2,13 +2,14 @@ mod err;
 
 pub use self::err::{DrawError, Result};
 use std::fmt;
-use std::io;
 use std::mem;
 
 pub const SPEC_MAX_X: usize = 10;
 pub const SPEC_MAX_Y: usize = 5;
 pub const SPEC_MAX_XY: usize = SPEC_MAX_X * SPEC_MAX_Y;
 pub const SPEC_MAX_PRE_XY: usize = SPEC_MAX_XY - 1;
+
+use ::Cursor;
 
 pub use super::{Emotion, EmotionError};
 pub use super::{Posture, PostureError};
@@ -18,10 +19,12 @@ pub use super::texel::part::Part;
 use ::time;
 
 /// Posture is like the Posture of the drawned persona.
+
+#[derive(Copy)]
 pub struct Draw {
     posture: Posture,
     duration: time::Duration,
-    board: io::Cursor<[(Emotion, Texel); SPEC_MAX_XY]>,
+    board: Cursor<[(Emotion, Texel); SPEC_MAX_XY]>,
 }
 
 impl Draw {
@@ -39,7 +42,7 @@ impl Draw {
                 Ok(Draw {
                     posture: *position,
                     duration: time::Duration::milliseconds(duration),
-                    board: io::Cursor::new(line),
+                    board: Cursor::new(line),
                 })
             }
         } else {
@@ -89,13 +92,13 @@ impl Draw {
     /// The accessor method `get_position` returns the position of
     /// the file sprite cursor.
     pub fn get_position(&self) -> usize {
-        self.board.position() as usize
+        self.board.position()
     }
 
     /// The mutator method `set_position` changes the position of
     /// the file sprite cursor.
     pub fn set_position(&mut self, position: usize) {
-        self.board.set_position(position as u64);
+        self.board.set_position(position);
     }
 
     /// The mutator method `add_position` increments the position of
@@ -162,7 +165,7 @@ impl Clone for Draw {
         Draw {
             posture: self.posture,
             duration: self.duration,
-            board: io::Cursor::new(*self.board.get_ref()),
+            board: Cursor::new(*self.board.get_ref()),
         }
     }
 
@@ -186,7 +189,7 @@ impl Default for Draw {
             Draw {
                 posture: Posture::default(),
                 duration: time::Duration::milliseconds(0),
-                board: io::Cursor::new(board),
+                board: Cursor::new(board),
             }
         }
     }

@@ -3,9 +3,10 @@ pub mod draw;
 mod err;
 
 use std::collections::HashMap;
-use std::io;
 use std::usize;
 use std::mem;
+
+use Cursor;
 
 pub use self::draw::SPEC_MAX_XY;
 
@@ -24,7 +25,7 @@ pub const SPEC_MAX_DRAW: usize = 16;
 #[derive(Debug)]
 pub struct Sprite {
     texel: HashMap<Tuple, Vec<Texel>>,
-    sheet: io::Cursor<[Draw; SPEC_MAX_DRAW]>,
+    sheet: Cursor<[Draw; SPEC_MAX_DRAW]>,
     count: usize,
 }
 
@@ -100,12 +101,12 @@ impl Sprite {
     pub fn current(&self) -> Option<(&Emotion, &Texel)> {
         self.sheet
             .get_ref()
-            .get(self.get_position())
+            .get(self.sheet.position())
             .and_then(|draw| draw.current())
     }
 
     pub fn set_current(&mut self, cell: (&Emotion, &Vec<Texel>)) -> Option<()> {
-        let position: usize = self.get_position();
+        let position: usize = self.sheet.position();
         self.sheet
             .get_mut()
             .get_mut(position)
@@ -115,30 +116,24 @@ impl Sprite {
     pub fn get_posture(&self) -> Option<&Posture> {
         self.sheet
             .get_ref()
-            .get(self.get_position())
+            .get(self.sheet.position())
             .and_then(|draw| Some(draw.get_posture()))
     }
 
     pub fn get_current_draw(&self) -> Option<&Draw> {
-        self.sheet.get_ref().get(self.get_position())
-    }
-
-    /// The accessor method `get_position` returns the position of
-    /// the draw sheet cursor.
-    fn get_position(&self) -> usize {
-        self.sheet.position() as usize
+        self.sheet.get_ref().get(self.sheet.position())
     }
 
     /// The mutator method `set_position` changes the position of
     /// the file sprite cursor.
     fn set_position(&mut self, position: usize) {
-        self.sheet.set_position(position as u64);
+        self.sheet.set_position(position);
     }
 
     /// The mutator method `add_position_draw` increments the position of
     /// the draw sheet cursor.
     pub fn add_position(&mut self, position: usize) -> Option<()> {
-        match (self.get_position().checked_add(position),
+        match (self.sheet.position().checked_add(position),
                self.sheet.get_ref().len()) {
             (Some(pos), len) if pos < len => Some(self.set_position(pos)),
             _ => None,
@@ -148,7 +143,7 @@ impl Sprite {
     /// The mutator method `sub_position` decrements the position of
     /// the draw sheet cursor.
     pub fn sub_position(&mut self, position: usize) -> Option<()> {
-        self.get_position()
+        self.sheet.position()
             .checked_sub(position)
             .or_else(|| self.sheet.get_ref().len().checked_sub(1))
             .and_then(|pos| Some(self.set_position(pos)))
@@ -157,7 +152,7 @@ impl Sprite {
     /// The mutator method `add_position_draw` increments the position of
     /// the cell board cursor.
     pub fn add_position_draw(&mut self, position: usize) -> Option<()> {
-        let current_position: usize = self.get_position();
+        let current_position: usize = self.sheet.position();
         self.sheet
             .get_mut()
             .get_mut(current_position)
@@ -169,7 +164,7 @@ impl Sprite {
     /// The mutator method `sub_position_draw` decrements the position of
     /// the cell board cursor.
     pub fn sub_position_draw(&mut self, position: usize) -> Option<()> {
-        let current_position: usize = self.get_position();
+        let current_position: usize = self.sheet.position();
         self.sheet
             .get_mut()
             .get_mut(current_position)
@@ -186,7 +181,7 @@ impl Clone for Sprite {
                 sheet.clone_from_slice(self.sheet.get_ref());
                 Sprite {
                     texel: self.texel.clone(),
-                    sheet: io::Cursor::new(sheet),
+                    sheet: Cursor::new(sheet),
                     count: self.count,
                 }
             }
@@ -213,7 +208,7 @@ impl Default for Sprite {
             }));
             Sprite {
                 texel: HashMap::with_capacity(SPEC_MAX_XY),
-                sheet: io::Cursor::new(sheet),
+                sheet: Cursor::new(sheet),
                 count: 0,
             }
         }

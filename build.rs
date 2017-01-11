@@ -2,8 +2,6 @@
 #![feature(advanced_slice_patterns)]
 #![allow(dead_code)]
 
-extern crate lalrpop;
-
 pub mod graphic {
     /// The sub-directory texel.
     pub const SPEC_SUBD_NCT: &'static str = "texels";
@@ -44,7 +42,6 @@ fn copy<S: AsRef<OsStr>>(
 }
 
 fn main() {
-    lalrpop::process_root().unwrap();
     env::var("CARGO_MANIFEST_DIR").ok()
         .and_then(|path: String| {
             let mut source: PathBuf = PathBuf::from(path);
