@@ -11,7 +11,7 @@ pub mod graphic {
     pub const SPEC_ROOT: &'static str = "NEKO_PATH";
 }
 
-const SPEC_ROOT: &'static str = "etc";
+const SPEC_ROOT: &'static str = "assets";
 
 use std::env;
 use std::fs;

@@ -68,7 +68,7 @@ pub const SPEC_SUBD_NCS: &'static str = "sprites";
 pub const SPEC_SUBD_NCF: &'static str = "fonts";
 /// The first directory.
 pub const SPEC_ROOT: &'static str = "NEKO_PATH";
-pub const SPEC_ROOT_DEFAULT: &'static str = "etc";
+pub const SPEC_ROOT_DEFAULT: &'static str = "assets";
 
 #[derive(Clone, Debug)]
 pub struct Graphic {
