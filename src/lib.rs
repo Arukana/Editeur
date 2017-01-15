@@ -304,7 +304,6 @@ impl Graphic {
 
     /// The function `from_file_texel` insert a texel from a file.
     pub fn insert_from_texelfile<S: AsRef<Path>>(&mut self, source: S) -> Result<()> {
-        println!("{:?}", source.as_ref());
         match fs::OpenOptions::new().read(true).open(source.as_ref()) {
             Err(why) => Err(GraphicError::OpenFile(why)),
             Ok(buffer) => {

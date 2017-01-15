@@ -13,8 +13,8 @@ pub enum SpriteError {
 impl fmt::Display for SpriteError {
     /// The function `fmt` formats the value using
     /// the given formatter.
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self)
+    fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
+        Ok(())
     }
 }
 
@@ -23,7 +23,7 @@ impl Error for SpriteError {
     /// the error.
     fn description(&self) -> &str {
         match *self {
-    }
+        }
     }
 
     /// The function `cause` returns the lower-level cause of
