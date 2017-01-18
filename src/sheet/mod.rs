@@ -1,14 +1,17 @@
 mod err;
 
 use std::fmt;
+use std::char;
 
 pub use self::err::{SheetError, Result};
 
-#[repr(u8)]
+#[repr(u32)]
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum Sheet {
-    None = b'_',
-    Bust = b'b',
+    /// Symbol '_'.
+    None = 0x5f,
+    /// Symbol 'b'.
+    Bust = 0x62,
 }
 
 impl Sheet {
@@ -30,9 +33,8 @@ impl Sheet {
 
 impl fmt::Display for Sheet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-            Sheet::None => '_',
-            Sheet::Bust => 'B',
+        write!(f, "{}", unsafe {
+            char::from_u32_unchecked(*self as u32)
         })
     }
 }

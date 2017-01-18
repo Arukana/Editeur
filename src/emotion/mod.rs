@@ -1,21 +1,31 @@
 mod err;
 
 use std::fmt;
+use std::char;
 
 pub use self::err::{EmotionError, Result};
 
-#[repr(u8)]
+#[repr(u32)]
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum Emotion {
-    None = b'_',
-    Angry = b'a',
-    Happy = b'h',
-    Love = b'l',
-    Malicious = b'm',
-    Misunderstanding = b'i',
-    Shocked = b'o',
-    Sleepy = b's',
-    Speechless = b'e',
+    /// Symbol '_'.
+    None = 0x5f,
+    /// Symbol 'a'.
+    Angry = 0x61,
+    /// Symbol 'h'.
+    Happy = 0x68,
+    /// Symbol 'l'.
+    Love = 0x6c,
+    /// Symbol 'm'.
+    Malicious = 0x6d,
+    /// Symbol 'i'.
+    Misunderstanding = 0x69,
+    /// Symbol 'o'.
+    Shocked = 0x6f,
+    /// Symbol 's'.
+    Sleepy = 0x73,
+    /// Symbol 'e'.
+    Speechless = 0x65,
 }
 
 impl Emotion {
@@ -50,16 +60,8 @@ impl Emotion {
 
 impl fmt::Display for Emotion {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-            Emotion::Angry => 'A',
-            Emotion::Happy => 'H',
-            Emotion::Love => 'L',
-            Emotion::Malicious => 'M',
-            Emotion::Misunderstanding => 'I',
-            Emotion::Shocked => 'S',
-            Emotion::Sleepy => 'E',
-            Emotion::Speechless => 'C',
-            Emotion::None => '_',
+        write!(f, "{}", unsafe {
+            char::from_u32_unchecked(*self as u32)
         })
     }
 }

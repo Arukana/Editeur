@@ -4,36 +4,59 @@ pub mod err;
 pub use self::err::{PartError, Result};
 use std::fmt;
 
-#[repr(u8)]
+#[repr(u32)]
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum Part {
-    None = b'_',
-
-    ArmLeft = b'a',
-    ArmRight = b'A',
-    Boobs = b'b',
-    Clavicle = b'c',
-    EarLeft = b'e',
-    EarRight = b'E',
-    EyeLeft = b'y',
-    EyeRight = b'Y',
-    HairTop = b'o',
-    HairLeft = b'r',
-    HairRight = b'R',
-    HandLeft = b'd',
-    HandRight = b'D',
-    Mouth = b'm',
-    Tail = b't',
-
-    Bell = b'l',
-    ExclamationMark = b'x',
-    ExclamationMarks = b'X',
-    Heart = b'h',
-    Hearts = b'H',
-    Lantern = b'n',
-    QuestionMark = b'q',
-    QuestionMarks = b'Q',
-    WoolBall = b'w',
+    /// Symbol '_'.
+    None = 0x5f,
+    /// Symbol 'a'.
+    ArmLeft = 0x61,
+    /// Symbol 'A'.
+    ArmRight = 0x41,
+    /// Symbol 'b'.
+    Boobs = 0x62,
+    /// Symbol 'c'.
+    Clavicle = 0x63,
+    /// Symbol 'e'.
+    EarLeft = 0x65,
+    /// Symbol 'E'.
+    EarRight = 0x45,
+    /// Symbol 'y'.
+    EyeLeft = 0x79,
+    /// Symbol 'Y'.
+    EyeRight = 0x59,
+    /// Symbol 'o'.
+    HairTop = 0x6f,
+    /// Symbol 'r'.
+    HairLeft = 0x72,
+    /// Symbol 'R'.
+    HairRight = 0x52,
+    /// Symbol 'd',
+    HandLeft = 0x64,
+    /// Symbol 'D',
+    HandRight = 0x44,
+    /// Symbol 'm',
+    Mouth = 0x6d,
+    /// Symbol 't'.
+    Tail = 0x74,
+    /// Symbol 'l'.
+    Bell = 0x6c,
+    /// Symbol 'x'.
+    ExclamationMark = 0x78,
+    /// Symbol 'X'.
+    ExclamationMarks = 0x58,
+    /// Symbol 'h'.
+    Heart = 0x68,
+    /// Symbol 'H'.
+    Hearts = 0x48,
+    /// Symbol 'n'.
+    Lantern = 0x6e,
+    /// Symbol 'q'.
+    QuestionMark = 0x71,
+    /// Symbol 'Q'.
+    QuestionMarks = 0x51,
+    /// Symbol 'w'.
+    WoolBall = 0x77,
 }
 
 impl Part {
@@ -80,36 +103,35 @@ impl Part {
 
 impl fmt::Display for Part {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}",
-               match *self {
-                  Part::ArmLeft => "Ml",
-                  Part::ArmRight => "Mr",
-                  Part::Boobs => "Oo",
-                  Part::Clavicle => "Cl",
-                  Part::EarLeft => "Al",
-                  Part::EarRight => "Ar",
-                  Part::EyeLeft => "El",
-                  Part::EyeRight => "Er",
-                  Part::HairTop => "Rt",
-                  Part::HairLeft => "Rl",
-                  Part::HairRight => "Rr",
-                  Part::HandLeft => "Hl",
-                  Part::HandRight => "Hr",
-                  Part::Mouth => "Mo",
-                  Part::Tail => "Ta",
+        write!(f, "{}", match *self {
+              Part::ArmLeft => "Ml",
+              Part::ArmRight => "Mr",
+              Part::Boobs => "Oo",
+              Part::Clavicle => "Cl",
+              Part::EarLeft => "Al",
+              Part::EarRight => "Ar",
+              Part::EyeLeft => "El",
+              Part::EyeRight => "Er",
+              Part::HairTop => "Rt",
+              Part::HairLeft => "Rl",
+              Part::HairRight => "Rr",
+              Part::HandLeft => "Hl",
+              Part::HandRight => "Hr",
+              Part::Mouth => "Mo",
+              Part::Tail => "Ta",
 
-                  Part::Bell => "Be",
-                  Part::ExclamationMark => "Xm",
-                  Part::ExclamationMarks => "Xs",
-                  Part::Heart => "He",
-                  Part::Hearts => "Hs",
-                  Part::Lantern => "La",
-                  Part::QuestionMark => "Qm",
-                  Part::QuestionMarks => "Qs",
-                  Part::WoolBall => "Wb",
+              Part::Bell => "Be",
+              Part::ExclamationMark => "Xm",
+              Part::ExclamationMarks => "Xs",
+              Part::Heart => "He",
+              Part::Hearts => "Hs",
+              Part::Lantern => "La",
+              Part::QuestionMark => "Qm",
+              Part::QuestionMarks => "Qs",
+              Part::WoolBall => "Wb",
 
-                  Part::None => "__",
-               })
+              Part::None => "__",
+       })
     }
 }
 
