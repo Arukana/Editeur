@@ -137,6 +137,16 @@ impl Draw {
                         Some(())
                   });
     }
+
+    pub fn next(&mut self) -> Option<(Emotion, Texel)> {
+        let position: usize = self.get_position();
+    
+        self.board.set_position(position+1);
+        self.board
+            .get_ref()
+            .get(position)
+            .and_then(|&(ref emotion, ref texel)| Some((*emotion, *texel)))
+    }
 }
 
 impl<'a> IntoIterator for &'a Draw {
