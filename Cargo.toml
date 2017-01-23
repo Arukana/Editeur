@@ -14,18 +14,14 @@ build            = "build.rs"
 keywords         = ["character", "expression", "editor"]
 license          = "GPL-3.0"
 
-[lib]
-name             = "graphic"
-path             = "src/lib.rs"
-plugin           = true
-doctest          = false
-test             = false
-
 [[bin]]
-name             = "editeur"
-path             = "src/main.rs"
-doc              = false
-test             = false
+name = "editeur"
+test = false
+doc = false
+
+[lib]
+test = false
+doctest = false
 
 [features]
 default          = []
