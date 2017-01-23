@@ -14,13 +14,13 @@ pub use self::err::{EditeurError, Result};
 
 use self::menu::Menu;
 
-use graphic::Graphic;
-use graphic::sheet::Sheet;
-use graphic::emotion::Emotion;
-use graphic::sprite::Sprite;
-use graphic::sprite::draw::{Draw, SPEC_MAX_X};
-use graphic::sprite::texel::Texel;
-use graphic::sprite::texel::part::Part;
+use editeur::Graphic;
+use editeur::sheet::Sheet;
+use editeur::emotion::Emotion;
+use editeur::sprite::Sprite;
+use editeur::sprite::draw::{Draw, SPEC_MAX_X};
+use editeur::sprite::texel::Texel;
+use editeur::sprite::texel::part::Part;
 
 use super::termion;
 

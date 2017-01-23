@@ -5,7 +5,7 @@
 // This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! # editeur
+//! # interface
 
 #![feature(slice_patterns)]
 #![feature(advanced_slice_patterns)]
@@ -32,14 +32,14 @@
 #[cfg(feature = "clipboard")]
 extern crate clipboard;
 extern crate termion;
-extern crate graphic;
+extern crate editeur;
 
-mod editeur;
+mod interface;
 
 use std::io::Write;
 
 fn main() {
-    let mut editeur: editeur::Editeur = editeur::Editeur::new().unwrap();
+    let mut editeur: interface::Editeur = interface::Editeur::new().unwrap();
 
     loop {
         print!("{}", editeur);
