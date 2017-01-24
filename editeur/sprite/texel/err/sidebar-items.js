@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["TexelError","The enum `TexelError` defines the possible errors from constructor Texel."]],"type":[["Result",""]]});

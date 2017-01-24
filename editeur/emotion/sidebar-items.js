@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Emotion",""],["EmotionError","The enum `EmotionError` defines the possible errors from constructor Emotion."]],"type":[["Result",""]]});

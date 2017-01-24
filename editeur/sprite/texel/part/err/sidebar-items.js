@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["PartError","The enum `PartError` defines the possible errors from constructor Part."]],"type":[["Result",""]]});

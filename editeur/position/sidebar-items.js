@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Posture",""],["PostureError","The enum `PostureError` defines the possible errors from constructor Posture."]],"type":[["Result",""]]});
