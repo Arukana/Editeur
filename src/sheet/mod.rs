@@ -9,39 +9,72 @@ pub use self::err::{SheetError, Result};
 pub enum Sheet {
     /// Symbol '_'.
     None = 0x5f,
-    BustAngry = b'A' as u32,
-    BustHappy = b'H' as u32,
-    BustLove = b'L' as u32,
-    BustMalicious = b'M' as u32,
-    BustMisunderstanding = b'm' as u32,
-    BustNormal = b'n' as u32,
-    BustPlaying = b'P' as u32,
-    BustShocked = b'S' as u32,
-    BustSleepy = b's' as u32,
-    BustSpeechless = b'p' as u32,
-    BustSurprised = b'U' as u32,
-    LyingAngry = b'a' as u32,
-    LyingHappy = b'h' as u32,
-    LyingLove = b'l' as u32,
-    LyingMalicious = b'I' as u32,
-    LyingMisunderstanding = b'i' as u32,
-    LyingNormal = b'N' as u32,
-    LyingPlaying = b'R' as u32,
-    LyingShocked = b'D' as u32,
-    LyingSleepy = b'E' as u32,
-    LyingSpeechless = b'C' as u32,
-    LyingSurprised = b'u' as u32,
-    SeizaAngry = b'G' as u32,
-    SeizaHappy = b'Y' as u32,
-    SeizaLove = b'V' as u32,
-    SeizaMalicious = b'c' as u32,
-    SeizaMisunderstanding = b'e' as u32,
-    SeizaNormal = b'o' as u32,
-    SeizaPlaying = b'g' as u32,
-    SeizaShocked = b'K' as u32,
-    SeizaSleepy = b'y' as u32,
-    SeizaSpeechless = b'Z' as u32,
-    SeizaSurprised = b'd' as u32,
+    /// Symbol 'A'.
+    BustAngry = 0x41,
+    /// Symbol 'H'.
+    BustHappy = 0x48,
+    /// Symbol 'L'.
+    BustLove = 0x4c,
+    /// Symbol 'M'.
+    BustMalicious = 0x4d,
+    /// Symbol 'm'.
+    BustMisunderstanding = 0x6d,
+    /// Symbol 'n'.
+    BustNormal = 0x6e,
+    /// Symbol 'P'.
+    BustPlaying = 0x50,
+    /// Symbol 'S'.
+    BustShocked = 0x53,
+    /// Symbol 's'.
+    BustSleepy = 0x73,
+    /// Symbol 'p'.
+    BustSpeechless = 0x70, 
+    /// Symbol 'U'.
+    BustSurprised = 0x55,
+    /// Symbol 'a'.
+    LyingAngry = 0x61,
+    /// Symbol 'h'.
+    LyingHappy = 0x68,
+    /// Symbol 'l'.
+    LyingLove = 0x6c,
+    /// Symbol 'I'.
+    LyingMalicious = 0x49,
+    /// Symbol 'i'.
+    LyingMisunderstanding = 0x69,
+    /// Symbol 'N'.
+    LyingNormal = 0x4e,
+    /// Symbol 'R'.
+    LyingPlaying = 0x52,
+    /// Symbol 'D'.
+    LyingShocked = 0x44,
+    /// Symbol 'E'.
+    LyingSleepy = 0x45,
+    /// Symbol 'C'.
+    LyingSpeechless = 0x43,
+    /// Symbol 'u'.
+    LyingSurprised = 0x75,
+    /// Symbol 'G'.
+    SeizaAngry = 0x47,
+    /// Symbol 'Y'.
+    SeizaHappy = 0x59,
+    /// Symbol 'V'.
+    SeizaLove = 0x56,
+    /// Symbol 'c'.
+    SeizaMalicious = 0x63,
+    /// Symbol 'e'.
+    SeizaMisunderstanding = 0x65,
+    /// Symbol 'o'.
+    SeizaNormal = 0x6f,
+    /// Symbol 'g'.
+    SeizaPlaying = 0x67,
+    /// Symbol 'K'.
+    SeizaShocked = 0x4b,
+    /// Symbol 'y'.
+    SeizaSleepy = 0x79,
+    /// Symbol 'Z'.
+    SeizaSpeechless = 0x5a,
+    /// Symbol 'd'.
+    SeizaSurprised = 0x64,
 }
 
 impl Sheet {
