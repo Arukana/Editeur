@@ -1,7 +1,6 @@
 mod err;
 
 use std::fmt;
-use std::char;
 
 pub use self::err::{SheetError, Result};
 
@@ -128,9 +127,7 @@ impl Sheet {
 
 impl fmt::Display for Sheet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", unsafe {
-            char::from_u32_unchecked(*self as u32)
-        })
+        write!(f, "{}", self.get_name())
     }
 }
 
