@@ -1,6 +1,6 @@
 pub use ::tuple::Tuple;
 pub use ::emotion::Emotion;
-pub use ::position::Posture;
+pub use ::sheet::Sheet;
 pub use ::sprite::texel::part::Part;
 
 pub fn init<T>(e: Option<T>, v: Vec<T>) -> Vec<T> {

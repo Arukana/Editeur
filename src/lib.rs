@@ -25,7 +25,6 @@ pub mod tuple;
 pub mod sheet;
 pub mod sprite;
 pub mod emotion;
-pub mod position;
 pub mod util;
 mod err;
 pub mod cursor;
@@ -34,7 +33,6 @@ pub mod prelude;
 
 pub use self::cursor::Cursor;
 pub use self::emotion::Emotion;
-use self::position::Posture;
 use self::sprite::Sprite;
 use self::sheet::Sheet;
 
@@ -55,9 +53,9 @@ use std::ops::Not;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
-/// The default capacity of Posture dictionary.
+/// The default capacity of Sheet dictionary.
 pub const SPEC_CAPACITY_POSITION: usize = 25;
-/// The default capacity of Sprite dictionary by Posture dictionary.
+/// The default capacity of Sprite dictionary by Sheet dictionary.
 pub const SPEC_CAPACITY_SPRITE: usize = 5;
 
 /// The sub-directory texel.
@@ -73,7 +71,7 @@ pub const SPEC_ROOT_DEFAULT: &'static str = "assets";
 #[derive(Clone, Debug)]
 pub struct Graphic {
     /// Dictionary of texel.
-    texel: HashMap<Posture, HashMap<Tuple, Vec<Texel>>>,
+    texel: HashMap<Sheet, HashMap<Tuple, Vec<Texel>>>,
     /// Dictionary of primitive's sprite.
     sprite: io::Cursor<Vec<(Sheet, Sprite)>>,
 }
@@ -82,7 +80,7 @@ impl Graphic {
 
     pub fn get_posture(&self,
                        name: &Sheet
-    ) -> Option<&Posture> {
+    ) -> Option<&Sheet> {
             self.sprite.get_ref().iter()
                 .find(|&&(ref sheet, _)| sheet.eq(name))
                 .and_then(|&(_, ref sprite)|
@@ -189,9 +187,9 @@ impl Graphic {
 
 
     /// The accessor method `get_emotion_list` returns a list of available emotions
-    /// for the Posture key and Part sub-key.
+    /// for the Sheet key and Part sub-key.
     pub fn get_emotion_list(&self,
-                            posture_key: &Posture,
+                            posture_key: &Sheet,
                             part_key: &Part,
     ) -> Option<Vec<&Emotion>> {
         self.texel.get(posture_key)
@@ -203,7 +201,7 @@ impl Graphic {
     }
 
     pub fn get_cell_list(&self,
-                            posture_key: &Posture,
+                            posture_key: &Sheet,
                             part_key: &Part,
     ) -> Option<Vec<(&Emotion, &Vec<Texel>)>> {
         self.texel.get(posture_key)
@@ -217,7 +215,7 @@ impl Graphic {
 
     /// The accessor method `get_texel` returns a reference on texel.
     pub fn get_texel(&self,
-                 position: &Posture,
+                 position: &Sheet,
                  tuple: &Tuple,
     ) -> Option<&Vec<Texel>> {
         self.texel.get(position).and_then(|sprite|
@@ -233,7 +231,7 @@ impl Graphic {
 
     /// The function `insert_texel` insert a texel.
     fn insert_texel(&mut self,
-                    (position, tuple): (Posture, Tuple),
+                    (position, tuple): (Sheet, Tuple),
                     val: Texel,
     ) {
         self.texel.entry(position)
@@ -251,10 +249,10 @@ impl Graphic {
     fn line_with_character(
         &mut self, posture: &str, part: &str, emotion: &str, character: char
     ) -> Result<()> {
-        match (Posture::new(posture),
+        match (Sheet::new(posture),
                Texel::new(part, character),
                Emotion::new(emotion)) {
-            (Err(why), _, _) => Err(GraphicError::Posture(why)),
+            (Err(why), _, _) => Err(GraphicError::Sheet(why)),
             (_, Err(why), _) => Err(GraphicError::Texel(why)),
             (_, _, Err(why)) => Err(GraphicError::Emotion(why)),
             (Ok(posture), Ok(texel), Ok(emotion)) => {
@@ -321,7 +319,7 @@ impl Graphic {
     }
 
     fn sprite_with_draw(
-        &self, sprite: &mut Sprite, duration: &str, posture: &Posture, pairs: &&[&str],
+        &self, sprite: &mut Sprite, duration: &str, posture: &Sheet, pairs: &&[&str],
     ) -> Result<()> {
         self.texel.get(posture)
             .and_then(|texels|
@@ -360,8 +358,8 @@ impl Graphic {
                              .and_then(|(sprite_name, duration_and_draw)|
                                        duration_and_draw.split_first()
                                        .and_then(|(duration, draw)| Some(
-                                            match Posture::new(sprite_name) {
-                                                Err(why) => Err(GraphicError::Posture(why)),
+                                            match Sheet::new(sprite_name) {
+                                                Err(why) => Err(GraphicError::Sheet(why)),
                                                 Ok(posture) => {
                                                     self.sprite_with_draw(
                                                         &mut sprite, duration, &posture, &draw

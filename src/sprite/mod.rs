@@ -17,7 +17,7 @@ pub use self::err::{SpriteError, Result};
 pub use super::tuple::Tuple;
 pub use super::Part;
 pub use super::emotion::{Emotion, EmotionError};
-pub use super::position::{Posture, PostureError};
+pub use super::sheet::{Sheet, SheetError};
 
 /// The limit of draws by sprite.
 pub const SPEC_MAX_DRAW: usize = 16;
@@ -63,7 +63,7 @@ impl Sprite {
     /// tuple of emotion by part.
     pub fn insert_list(&mut self,
         duration: i64,
-        posture: &Posture,
+        posture: &Sheet,
         source: &[Tuple],
     ) {
         let mut draw: Vec<(Emotion, Texel)> = Vec::with_capacity(SPEC_MAX_XY);
@@ -113,7 +113,7 @@ impl Sprite {
             .and_then(|board| Some(board.set_current(cell)))
     }
 
-    pub fn get_posture(&self) -> Option<&Posture> {
+    pub fn get_posture(&self) -> Option<&Sheet> {
         self.sheet
             .get_ref()
             .get(self.sheet.position())

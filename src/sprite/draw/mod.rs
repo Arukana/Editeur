@@ -12,23 +12,23 @@ pub const SPEC_MAX_PRE_XY: usize = SPEC_MAX_XY - 1;
 use ::Cursor;
 
 pub use super::{Emotion, EmotionError};
-pub use super::{Posture, PostureError};
+pub use super::{Sheet, SheetError};
 pub use super::Texel;
 pub use super::texel::part::Part;
 
 use ::time;
 
-/// Posture is like the Posture of the drawned persona.
+/// Sheet is like the Sheet of the drawned persona.
 
 #[derive(Copy)]
 pub struct Draw {
-    posture: Posture,
+    posture: Sheet,
     duration: time::Duration,
     board: Cursor<[(Emotion, Texel); SPEC_MAX_XY]>,
 }
 
 impl Draw {
-    pub fn new(position: &Posture,
+    pub fn new(position: &Sheet,
                duration: i64,
                buf: &[(Emotion, Texel)])
                -> Result<Self> {
@@ -85,7 +85,7 @@ impl Draw {
         }
     }
 
-    pub fn get_posture(&self) -> &Posture {
+    pub fn get_posture(&self) -> &Sheet {
         &self.posture
     }
 
@@ -160,7 +160,7 @@ impl<'a> IntoIterator for &'a Draw {
 
 impl fmt::Debug for Draw {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "(Posture: {:?}, sprite: {:?})",
+        write!(f, "(Sheet: {:?}, sprite: {:?})",
                self.posture,
                self.board
                    .get_ref()
@@ -197,7 +197,7 @@ impl Default for Draw {
                 true
             }));
             Draw {
-                posture: Posture::default(),
+                posture: Sheet::default(),
                 duration: time::Duration::milliseconds(0),
                 board: Cursor::new(board),
             }
