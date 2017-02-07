@@ -8,7 +8,7 @@ pub type Result<T> = ::std::result::Result<T, SheetError>;
 /// from constructor Sheet.
 #[derive(Clone, Debug)]
 pub enum SheetError {
-    UnknownSheet(String),
+    UnknownSheet,
 }
 
 impl fmt::Display for SheetError {
@@ -24,7 +24,7 @@ impl Error for SheetError {
   /// the error.
   fn description(&self) -> &str {
       match *self {
-         SheetError::UnknownSheet(ref name) => name,
+         SheetError::UnknownSheet => "The name is unknown.",
       }
   }
 

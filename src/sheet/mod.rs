@@ -114,7 +114,7 @@ impl Sheet {
             "SeizaSleepy" => Ok(Sheet::SeizaSleepy),
             "SeizaSpeechless" => Ok(Sheet::SeizaSpeechless),
             "SeizaSurprised" => Ok(Sheet::SeizaSurprised),
-            name => Err(SheetError::UnknownSheet(name.to_string())),
+            _ => Err(SheetError::UnknownSheet),
         }
     }
 
