@@ -192,7 +192,7 @@ impl Default for Draw {
             let mut board: [(Emotion, Texel); SPEC_MAX_XY] =
                 mem::uninitialized();
 
-            assert!(board.iter_mut().all(|mut tuple| {
+            assert!(board.iter_mut().all(|tuple| {
                 *tuple = (Emotion::default(), Texel::default());
                 true
             }));

@@ -1,5 +1,4 @@
 #![feature(slice_patterns)]
-#![feature(advanced_slice_patterns)]
 #![allow(dead_code)]
 
 pub mod graphic {

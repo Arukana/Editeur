@@ -202,7 +202,7 @@ impl Default for Sprite {
         unsafe {
             let mut sheet: [Draw; SPEC_MAX_DRAW] = mem::uninitialized();
 
-            assert!(sheet.iter_mut().all(|mut draw| {
+            assert!(sheet.iter_mut().all(|draw| {
                 *draw = Draw::default();
                 true
             }));

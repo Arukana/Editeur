@@ -8,7 +8,6 @@
 //! # interface
 
 #![feature(slice_patterns)]
-#![feature(advanced_slice_patterns)]
 
 #![crate_type="bin"]
 #![cfg_attr(feature = "nightly", feature(plugin))]
